@@ -1,0 +1,21 @@
+{
+  "name": "hameashenet",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "start": "node server.js",
+    "postinstall": "vite build"
+  },
+  "dependencies": {
+    "express": "^4.22.3"
+  },
+  "devDependencies": {
+    "vite": "^5.4.8"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

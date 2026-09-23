@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: hameashenet
+    runtime: node
+    plan: starter          # דיסק קבוע דורש תוכנית בתשלום. בתוכנית חינם הנתונים יתאפסו בכל פריסה.
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: ADMIN_PASS
+        sync: false        # להזין ידנית בלוח הבקרה של Render
+      - key: DATA_DIR
+        value: /var/data
+    disk:
+      name: data
+      mountPath: /var/data
+      sizeGB: 1

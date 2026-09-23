@@ -1,0 +1,760 @@
+<!-- This template is injected into #app by main.js -->
+<div id="siteBg" aria-hidden="true"></div>
+<a class="skipLink" href="#catalog">דילוג לתוכן הראשי</a>
+<div class="topWarn" role="note">אזהרה: המוצרים מכילים ניקוטין, חומר ממכר · מכירה אסורה מתחת לגיל 21</div>
+<header class="top" id="topHeader" role="banner"><div class="wrap topin">
+  <button class="menuBtn" id="menuBtn" onclick="toggleMenu()" aria-label="תפריט"><span></span><span></span><span></span></button>
+  <a class="brand" href="#"><div class="logoMark" id="logoMark"></div><div class="brandText"><b id="brandNameTop">המעשנת</b><small id="brandSubTop">VAPE SHOP</small></div></a>
+  <nav class="nav" role="navigation" aria-label="ניווט ראשי"><a href="#combo" id="navCombo" onclick="openCombo();return false">2 ב־100</a><a href="#business" id="navBiz" onclick="openBiz();return false">קטלוג לעסקים</a><a href="#catalog" id="navDeals" onclick="goCatalog();return false">קטלוג מוצרים</a><a href="#accessories" id="navAcc" onclick="openAcc();return false">אביזרי סלולר</a><a href="#toys" id="navToys" onclick="openToys();return false">צעצועים</a><a href="#categories">קטגוריות</a><a href="#about">אודות</a><a href="#contact" onclick="openContact();return false">צור קשר</a></nav>
+  <div class="grow"></div>
+  <button class="cartBtn" onclick="openCart()" aria-label="עגלה"><span class="cartIcon">🛒</span><span class="cartCount hidden">0</span></button>
+  <a class="btn wa waLink hideOnPhone" target="_blank" rel="noopener">וואטסאפ</a>
+  <button class="btn primary hideOnPhone" onclick="scrollToCatalog()">צפה בקטלוג</button>
+</div></header>
+
+<main id="mainContent" role="main">
+<section class="hero">
+  <div class="wrap"><div class="heroBox">
+    <div class="heroContent">
+      <div class="eyebrow" id="heroEyebrow">קטלוג סיטונאי לבתי עסק</div>
+      <h1 id="heroTitle">סיגריות אלקטרוניות</h1>
+      <p id="heroText">קטלוג מוצרים לעסקים מורשים בלבד, עם מלאי, טעמים ומחירון. ההזמנה נסגרת בוואטסאפ מול נציג.</p>
+      <div class="heroActions">
+        <button class="btn primary heroCta" onclick="goCatalog()"><span id="heroCtaLabel">קטלוג מוצרים</span> ומחירון</button>
+        <button class="btn secondary" onclick="scrollToCatalog()">פתח קטלוג</button>
+        <a class="btn wa waLink" target="_blank" rel="noopener">הזמנה בוואטסאפ</a>
+      </div>
+      <div class="heroStat">
+        <div class="stat"><b id="statProducts">0</b><span>מוצרים בקטלוג</span></div>
+        <div class="stat"><b id="statCategories">0</b><span>קטגוריות</span></div>
+        <div class="stat"><b>24/7</b><span>קטלוג זמין</span></div>
+      </div>
+    </div>
+    <div class="heroArt"><img id="heroDevice" alt="מכשיר אידוי חד־פעמי"></div>
+  </div></div>
+</section>
+
+<section id="catalog" class="section"><div class="wrap">
+  <div class="sectionHead">
+    <div><h2 id="catalogHead">קטלוג מוצרים</h2><p id="catalogSubtitle">כל המוצרים במקום אחד</p></div>
+    <div id="resultsCount" style="color:var(--muted)"></div>
+  </div>
+  <div class="catalogTools">
+    <input id="search" class="field" placeholder="חיפוש לפי שם, מק״ט או מותג..." oninput="renderProducts()">
+    <select id="catFilter" class="field" onchange="renderProducts()"><option value="">כל הקטגוריות</option></select>
+    <select id="brandFilter" class="field" onchange="renderProducts()"><option value="">כל המותגים</option></select>
+    <select id="sort" class="field" onchange="renderProducts()">
+      <option value="featured">מומלצים</option>
+      <option value="priceAsc">מחיר: נמוך לגבוה</option>
+      <option value="priceDesc">מחיר: גבוה לנמוך</option>
+      <option value="name">שם א-ת</option>
+    </select>
+  </div>
+  
+<!-- ===== אזהרת בריאות. מוצגת בראש כל מקטע מכירה ===== -->
+<div class="warnBar" role="note" aria-label="אזהרת בריאות">
+  <span class="warnIcon" aria-hidden="true">!</span>
+  <div>
+    <b>אזהרה: מוצר זה מכיל ניקוטין, שהוא חומר ממכר</b>
+    <p>מכירה אסורה למי שטרם מלאו לו 21. השימוש אסור לנשים בהריון או מניקות, לקטינים ולמי שאינו מעשן. הניקוטין עלול לפגוע בהתפתחות המוח בגיל צעיר.</p>
+  </div>
+</div>
+<div class="products" id="productsGrid"></div>
+</div></section>
+
+
+<!-- ===== מבצע 2 ב־100 ===== -->
+<section id="combo" class="section comboSection"><div class="wrap">
+  <div class="sectionHead">
+    <div>
+      <h2>מבצע 2 ב־100</h2>
+      <p>כל שתי סיגריות אלקטרוניות שמחירן עד 50 שקלים ליחידה — 100 שקלים לזוג. המחיר מחושב אוטומטית בעגלה.</p>
+    </div>
+    <div id="comboCount" style="color:var(--muted)"></div>
+  </div>
+  
+<!-- ===== אזהרת בריאות. מוצגת בראש כל מקטע מכירה ===== -->
+<div class="warnBar" role="note" aria-label="אזהרת בריאות">
+  <span class="warnIcon" aria-hidden="true">!</span>
+  <div>
+    <b>אזהרה: מוצר זה מכיל ניקוטין, שהוא חומר ממכר</b>
+    <p>מכירה אסורה למי שטרם מלאו לו 21. השימוש אסור לנשים בהריון או מניקות, לקטינים ולמי שאינו מעשן. הניקוטין עלול לפגוע בהתפתחות המוח בגיל צעיר.</p>
+  </div>
+</div>
+<div class="deals" id="comboGrid"></div>
+</div></section>
+
+<section id="business" class="section"><div class="wrap">
+  <div class="sectionHead"><div><h2 id="bizTitle">קטלוג לעסקים</h2><p id="bizSubtitle"></p></div></div>
+  
+<!-- ===== אזהרת בריאות. מוצגת בראש כל מקטע מכירה ===== -->
+<div class="warnBar" role="note" aria-label="אזהרת בריאות">
+  <span class="warnIcon" aria-hidden="true">!</span>
+  <div>
+    <b>אזהרה: מוצר זה מכיל ניקוטין, שהוא חומר ממכר</b>
+    <p>מכירה אסורה למי שטרם מלאו לו 21. השימוש אסור לנשים בהריון או מניקות, לקטינים ולמי שאינו מעשן. הניקוטין עלול לפגוע בהתפתחות המוח בגיל צעיר.</p>
+  </div>
+</div>
+<div class="deals" id="bizGrid"></div>
+  </div></section>
+
+<section id="accessories" class="section accSection"><div class="wrap">
+  <div class="sectionHead"><div><h2 id="accTitle">אביזרי סלולר</h2><p id="accSubtitle"></p></div></div>
+  <div class="deals" id="accGrid"></div>
+  </div></section>
+
+<section id="categories" class="section"><div class="wrap">
+  <div class="sectionHead"><div><h2>קטגוריות</h2><p>בחר קטגוריה להצגת המוצרים הרלוונטיים.</p></div></div>
+  <div class="categories" id="categoryCards"></div>
+</div></section>
+
+<section id="about" class="section"><div class="wrap">
+  <div class="aboutCard">
+    <h2 id="aboutTitle">עובדים מול בתי עסק בלבד</h2>
+    <p id="aboutText"></p>
+  </div>
+</div></section>
+</main>
+
+
+<!-- ===== עמוד התקנון. נפתח בכתובת #takanon ===== -->
+<section id="terms" class="section legalPage"><div class="wrap">
+  <div class="legalHead">
+    <h1>תקנון ותנאי שימוש</h1>
+    <p class="legalMeta">עודכן לאחרונה: אוגוסט 2026 · <span id="legalBiz">המעשנת</span></p>
+    <p class="legalIntro">מסמך זה מסדיר את תנאי השימוש באתר ואת ההתקשרות בין העסק לבין בתי עסק המזמינים ממנו. הקטלוג מיועד לרוכשים עסקיים בלבד ואינו חנות מקוונת לצרכן הפרטי.</p>
+  </div>
+
+  <nav class="legalToc" aria-label="תוכן עניינים">
+    <b>תוכן עניינים</b>
+    <ol>
+      <li><a href="#t1">כללי</a></li>
+      <li><a href="#t2">מכירה לבתי עסק ומגבלת גיל</a></li>
+      <li><a href="#t3">תנאי השימוש באתר</a></li>
+      <li><a href="#t4">אופן ההזמנה</a></li>
+      <li><a href="#t5">מחירים ותשלום</a></li>
+      <li><a href="#t6">אספקה ומסירה</a></li>
+      <li><a href="#t7">ביטול, החזרות והחלפות</a></li>
+      <li><a href="#t8">אחריות למוצרים</a></li>
+      <li><a href="#t9">פרטיות ומידע שנאסף</a></li>
+      <li><a href="#t10">קניין רוחני</a></li>
+      <li><a href="#t11">הגבלת אחריות</a></li>
+      <li><a href="#t12">שינויים בתקנון</a></li>
+      <li><a href="#t13">דין וסמכות שיפוט</a></li>
+      <li><a href="#t14">יצירת קשר</a></li>
+    </ol>
+  </nav>
+
+  <article class="legalBody">
+
+    <h2 id="t1">1. כללי</h2>
+    <p>אתר זה מופעל על ידי <b>המעשנת</b> ("העסק"), ומשמש כקטלוג סיטונאי להצגת מוצרי סיגריות אלקטרוניות ואביזרים נלווים בפני בתי עסק.</p>
+    <p>האתר אינו חנות מקוונת. לא ניתן לבצע בו רכישה, לא נגבה בו תשלום ואין בו סליקה. הצגת מוצר בקטלוג מהווה הזמנה להציע הצעה בלבד, ואינה מהווה הצעה מחייבת מצד העסק.</p>
+    <p>כל שימוש באתר, לרבות גלישה ועיון בקטלוג, מהווה הסכמה לתנאים המפורטים במסמך זה. מי שאינו מסכים לתנאים מתבקש שלא לעשות שימוש באתר.</p>
+    <p>האמור בתקנון זה מנוסח בלשון זכר מטעמי נוחות בלבד, ומתייחס לכל המינים כאחד.</p>
+
+    <h2 id="t2">2. מכירה לבתי עסק ומגבלת גיל</h2>
+    <div class="legalNote">
+      <b>עסקים מורשים בלבד, מגיל 21 ומעלה</b>
+      <p>הקטלוג מיועד לבתי עסק בעלי עוסק מורשה או חברה רשומה, לצורך רכישה סיטונאית לצורכי מסחר. אין מכירה ללקוח פרטי, ואין מכירה לשימוש עצמי.</p>
+    </div>
+    <p>מכירת מוצרי עישון, לרבות סיגריות אלקטרוניות, אסורה על פי דין למי שטרם מלאו לו 18 שנים, בהתאם לחוק הגבלת הפרסומת והשיווק של מוצרי טבק ומוצרי עישון. העסק בחר להחמיר ולהגביל את השימוש באתר ואת ההתקשרות עמו לבני 21 ומעלה בלבד.</p>
+    <p>בכניסה לאתר ובאישור הודעת הגיל, המשתמש מצהיר כי מלאו לו 21 שנים וכי הוא פועל מטעם בית עסק. מסירת הצהרה כוזבת מהווה הפרה של תקנון זה.</p>
+    <p>המוצרים מכילים ניקוטין. ניקוטין הוא חומר ממכר. העסק רשאי לדרוש הצגת אישור עוסק ותעודה מזהה בכל שלב, ולסרב להתקשרות ללא הנמקה.</p>
+
+    <h2 id="t3">3. תנאי השימוש באתר</h2>
+    <p>המשתמש מצהיר כי מלאו לו 21 שנים, כי הוא פועל מטעם בית עסק מורשה, וכי הפרטים שימסור בעת יצירת קשר יהיו נכונים ומלאים.</p>
+    <p>אין לעשות באתר שימוש בלתי חוקי, לנסות לחדור למערכותיו, לשבש את פעילותו, או להשתמש בתכניו לצרכים מסחריים ללא אישור מראש ובכתב מהעסק.</p>
+
+    <h2 id="t4">4. אופן ההזמנה</h2>
+    <p>ההזמנה נעשית באמצעות פנייה בוואטסאפ למספר המופיע באתר, או בכל דרך אחרת שיסכימו עליה הצדדים. פנייה ראשונית אינה מהווה הזמנה מחייבת.</p>
+    <p>הזמנה נחשבת מאושרת רק לאחר שנציג העסק אישר אותה במפורש, לרבות אישור זמינות המלאי, הכמות, המחיר ומועד האספקה. עד לאישור כאמור לא נכרת חוזה בין הצדדים.</p>
+    <p>המלאי והטעמים המוצגים באתר משקפים את המצב במועד עדכון הקטלוג ואינם התחייבות לזמינות. פריט המסומן כזמין עשוי להיגמר בין מועד העדכון למועד ההזמנה.</p>
+    <p>התמונות בקטלוג הן להמחשה בלבד. ייתכנו הבדלים בין המוצג לבין המוצר בפועל, לרבות בגוון, באריזה ובעיצוב, בין היתר עקב שינויים מצד היצרן.</p>
+
+    <h2 id="t5">5. מחירים ותשלום</h2>
+    <p>המחירים בקטלוג הם מחירים סיטונאיים לבתי עסק ואינם כוללים מס ערך מוסף, אלא אם צוין אחרת במפורש.</p>
+    <p>המחירים עשויים להשתנות בהתאם לכמות ההזמנה, למחירי הספקים ולשערי מטבע. המחיר המחייב הוא זה שאושר בכתב מול נציג בעת אישור ההזמנה.</p>
+    <p>אמצעי התשלום, מועדי התשלום ותנאי האשראי ייקבעו מול הנציג בעת ההזמנה. אין באתר גבייה מקוונת ואין בו איסוף של פרטי אמצעי תשלום.</p>
+
+    <h2 id="t6">6. אספקה ומסירה</h2>
+    <p>אזורי החלוקה, מועדי האספקה ודמי המשלוח ייקבעו מול הנציג ויימסרו ללקוח בעת אישור ההזמנה.</p>
+    <p>העסק אינו אחראי לעיכובים הנובעים מגורמים שאינם בשליטתו, ובכלל זה עיכובי ספקים או יבואנים, שביתות, מזג אוויר, מצב ביטחוני ותקלות של חברת השילוח.</p>
+    <p>אחריות למסירת כתובת מדויקת ולקבלת הסחורה במועד שנקבע חלה על הלקוח. על הלקוח לבדוק את תכולת המשלוח בעת קבלתו ולדווח על חוסר או פגם נראה לעין בתוך 48 שעות ממועד המסירה.</p>
+
+    <h2 id="t7">7. ביטול, החזרות והחלפות</h2>
+    <div class="legalNote">
+      <b>עסקה בין עוסקים</b>
+      <p>זכויות הביטול הקבועות בחוק הגנת הצרכן חלות על צרכן פרטי. ההתקשרות מכוח קטלוג זה היא בין עוסקים, ולכן תנאי הביטול וההחזרה הם אלה המפורטים להלן ואלה שסוכמו בכתב מול הנציג.</p>
+    </div>
+    <p>ביטול הזמנה שאושרה אפשרי בהסכמת העסק ובלבד שטרם יצאה לאספקה. הזמנה שסופקה אינה ניתנת לביטול, למעט במקרים המפורטים בסעיף האחריות.</p>
+    <p>מטעמי היגיינה ובטיחות, מוצרי אידוי חד־פעמיים, נוזלים ופודים שאריזתם המקורית נפתחה אינם ניתנים להחזרה או להחלפה, אלא אם נמצא בהם פגם ייצור.</p>
+    <p>החזרת סחורה תקינה, ככל שאושרה על ידי העסק, תיעשה באריזתה המקורית ובמצב סחיר, ועלות ההחזרה תחול על הלקוח.</p>
+
+    <h2 id="t8">8. אחריות למוצרים</h2>
+    <p>האחריות למוצרים היא אחריות היצרן או היבואן, בהתאם לתנאים הנלווים לכל מוצר. העסק ישמש כמתווך מול הספק בטיפול בפניות אחריות.</p>
+    <p>מוצר שנמצא בו פגם ייצור יוחלף או יזוכה בהתאם למדיניות הספק, ובכפוף לבדיקה. האחריות אינה חלה על נזק שנגרם משימוש שאינו לפי הוראות היצרן, מחשיפה לנוזלים, מנפילה, מפירוק, או מאחסון בתנאים בלתי נאותים.</p>
+    <p>הלקוח אחראי לאחסון הסחורה בבית העסק שלו בתנאים נאותים ולמכירתה בהתאם לדין החל, לרבות איסור מכירה לקטינים והוראות הסימון והפרסום.</p>
+
+    <h2 id="t9">9. פרטיות ומידע שנאסף</h2>
+    <p>האתר אינו כולל טופס הרשמה, אינו מנהל חשבונות משתמשים ואינו אוסף פרטים מזהים מהגולשים.</p>
+    <p>פנייה בוואטסאפ מעבירה לעסק את מספר הטלפון ואת תוכן ההודעה. מידע זה משמש לצורך הטיפול בפנייה ובהזמנה בלבד, ואינו נמסר לצד שלישי למעט לצורך אספקת ההזמנה או כנדרש על פי דין.</p>
+    <p>הגדרות מקומיות שנשמרות בדפדפן המשתמש נשמרות במכשירו בלבד ואינן מועברות לעסק.</p>
+    <p>שירות הוואטסאפ מופעל בידי צד שלישי וכפוף למדיניות הפרטיות שלו.</p>
+
+    <h2 id="t10">10. קניין רוחני</h2>
+    <p>העיצוב, הטקסטים, הקוד והלוגו של האתר הם רכושו של העסק ומוגנים בדיני זכויות יוצרים וסימני מסחר. אין להעתיקם, לשכפלם או לעשות בהם שימוש מסחרי ללא אישור מראש ובכתב.</p>
+    <p>שמות המותגים, סימני המסחר ותמונות המוצרים המופיעים בקטלוג הם רכושם של בעליהם, ומוצגים לצורכי זיהוי המוצרים המוצעים בלבד. הצגתם אינה מהווה טענה לבעלות ואינה מעידה על קשר או חסות מצד בעלי הסימנים.</p>
+
+    <h2 id="t11">11. הגבלת אחריות</h2>
+    <p>העסק עושה מאמץ לוודא את דיוק המידע בקטלוג, אולם המידע מבוסס בין היתר על נתוני יצרנים ויבואנים, וייתכנו בו טעויות או אי דיוקים. בכל מקרה של סתירה בין המוצג באתר לבין המוצר בפועל, יש לפנות לנציג לפני ההזמנה.</p>
+    <p>אחריות העסק בכל מקרה מוגבלת לסכום ששולם בפועל עבור ההזמנה הספציפית שבמחלוקת. העסק לא יישא בנזק עקיף, תוצאתי או מיוחד, לרבות אובדן רווח או פגיעה במוניטין.</p>
+    <p>העסק אינו אחראי לתקלות טכניות באתר, להפסקות בזמינותו או לנזק שמקורו בגורם חיצוני. השימוש במוצרים הוא באחריות המשתמש הסופי בלבד.</p>
+
+    <h2 id="t12">12. שינויים בתקנון</h2>
+    <p>העסק רשאי לעדכן תקנון זה מעת לעת. הנוסח המחייב הוא הנוסח המפורסם באתר במועד השימוש. המשך שימוש באתר לאחר עדכון מהווה הסכמה לנוסח המעודכן.</p>
+
+    <h2 id="t13">13. דין וסמכות שיפוט</h2>
+    <p>על תקנון זה ועל כל התקשרות מכוחו יחולו דיני מדינת ישראל בלבד. סמכות השיפוט הבלעדית בכל מחלוקת נתונה לבתי המשפט המוסמכים בישראל.</p>
+
+    <h2 id="t14">14. יצירת קשר</h2>
+    <p>לשאלות בנוגע לתקנון, להזמנות או לשירות, ניתן לפנות בוואטסאפ למספר המופיע באתר.</p>
+    <p class="legalContact"><a class="btn wa waLink" target="_blank" rel="noopener">פנייה בוואטסאפ</a></p>
+
+  </article>
+
+  <div class="legalBack"><a class="btn ghost" href="#" onclick="closeTerms();return false">חזרה לקטלוג</a></div>
+</div></section>
+
+
+<!-- ===== עמוד המבצעים. נפתח בכתובת #deals ===== -->
+<section id="deals" class="section dealsPage"><div class="wrap">
+  <div class="sectionHead">
+    <div>
+      <h2 id="dealsTitle">מבצעים</h2>
+      <p id="dealsSubtitle"></p>
+    </div>
+  </div>
+  <div class="deals" id="dealsGrid"></div>
+  <div class="legalBack"><a class="btn ghost" href="#" onclick="closeDeals();return false">חזרה לקטלוג</a></div>
+</div></section>
+
+
+<!-- רצועה קבועה בתחתית המסך בטלפון. התפריט העליון מוסתר שם,
+     ובלי זה עמוד המחירון פשוט לא נמצא. -->
+
+
+
+<!-- ===== קטלוג לעסקים. נפתח בכתובת #business ===== -->
+
+
+<!-- ===== אביזרי סלולר. נפתח בכתובת #accessories ===== -->
+
+
+<!-- ===== עמוד פנייה. נפתח בכתובת #contact ===== -->
+
+<!-- ===== הצהרת נגישות ===== -->
+<section id="accessibility" class="section legalPage"><div class="wrap">
+  <div class="legalHead">
+    <h1>הצהרת נגישות</h1>
+    <p class="legalMeta">עודכן: ספטמבר 2026</p>
+    <p class="legalIntro">אנו רואים חשיבות במתן שירות שוויוני לכלל הלקוחות, ופועלים להנגיש את האתר בהתאם לתקנות שוויון זכויות לאנשים עם מוגבלות, בהתאם לתקן הישראלי 5568 ברמת התאמה AA.</p>
+  </div>
+  <article class="legalBody">
+    <h2>מה הונגש באתר</h2>
+    <p>ניווט מלא באמצעות המקלדת, לרבות פתיחת תפריטים, בחירת טעמים והוספה לעגלה, עם סימון ברור של הרכיב שבמיקוד.</p>
+    <p>תפריט הגדרות נגישות הפותח בלחיצה על הסמל הקבוע בפינת המסך, ובו הגדלה והקטנה של הטקסט, מצב ניגודיות גבוהה, הדגשת קישורים, עצירת אנימציות וגופן קריא. ההעדפה נשמרת במכשיר.</p>
+    <p>מבנה סמנטי עם אזורי תוכן מוגדרים, כותרות בהיררכיה, תיאור חלופי לתמונות, ותיוג תקין של שדות טופס.</p>
+    <p>כיבוד העדפת מערכת ההפעלה לצמצום אנימציות, וקישור דילוג לתוכן הראשי בתחילת הדף.</p>
+
+    <h2>מגבלות ידועות</h2>
+    <p>ייתכנו רכיבים או תכנים שטרם הונגשו במלואם. אנו ממשיכים לשפר את הנגישות באופן שוטף.</p>
+
+    <h2>פניות בנושא נגישות</h2>
+    <p>נתקלתם בקושי? נשמח לדעת ולתקן. ניתן לפנות אלינו בוואטסאפ למספר המופיע באתר, ולציין את העמוד ואת אופי הקושי.</p>
+    <p class="legalContact"><a class="btn wa waLink" target="_blank" rel="noopener">פנייה בנושא נגישות</a></p>
+  </article>
+  <div class="legalBack"><a class="btn ghost" href="#" onclick="closeAccessibility();return false">חזרה לאתר</a></div>
+</div></section>
+
+
+<!-- ===== עמוד הצעצועים. עמוד עצמאי, אינו חלק מגלילת דף הבית ===== -->
+<section id="toys" class="toysPage">
+  <div class="toysHero">
+    <div class="toysBlob toysBlob1" aria-hidden="true"></div>
+    <div class="toysBlob toysBlob2" aria-hidden="true"></div>
+    <div class="toysBlob toysBlob3" aria-hidden="true"></div>
+    <div class="wrap toysHeroIn">
+      <span class="toysKicker">חנות הצעצועים</span>
+      <h1 id="toysTitle">צעצועים</h1>
+      <p id="toysSubtitle"></p>
+      <div class="toysHeroBtns">
+        <button class="tBtn tBtnMain" onclick="scrollToEl('toysCats')">לקטגוריות</button>
+        <a class="tBtn tBtnWa waLink" target="_blank" rel="noopener">הזמנה בוואטסאפ</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <div class="toysSectionHead" id="toysCats">
+      <h2>הקטגוריות שלנו</h2>
+      <p>בחרו קטגוריה כדי לראות את המוצרים</p>
+    </div>
+    <div class="toysCats" id="toysCatGrid"></div>
+
+    <div class="toysSectionHead">
+      <h2 id="toysListTitle">כל המוצרים</h2>
+      <div class="toysFilterRow">
+        <input id="toysSearch" class="tInput" placeholder="חיפוש מוצר" oninput="renderToys()" aria-label="חיפוש מוצר">
+        <button class="tChip" id="toysClear" onclick="setToyCat('')" hidden>ניקוי סינון</button>
+      </div>
+    </div>
+    <div class="toysGrid" id="toysGrid"></div>
+
+    <div class="toysBack"><button class="tBtn tBtnGhost" onclick="closeToys()">חזרה לאתר</button></div>
+  </div>
+</section>
+
+<section id="contact" class="section contactPage"><div class="wrap">
+  <div class="sectionHead">
+    <div>
+      <h2 id="contactTitle">פנייה למערכת</h2>
+      <p id="contactText">מלא את הפרטים ונחזור אליך. הפנייה נשלחת בוואטסאפ, כך שהיא מגיעה מיד ואפשר להמשיך את השיחה באותו מקום.</p>
+    </div>
+  </div>
+
+  <div class="contactGrid">
+    <div class="contactForm">
+      <label class="label">נושא הפנייה</label>
+      <div class="topicRow" id="topicRow"></div>
+
+      <div class="grid2" style="margin-top:16px">
+        <div><label class="label">שם איש הקשר</label><input id="cName" class="input" placeholder="שם מלא"></div>
+        <div><label class="label">שם בית העסק</label><input id="cBiz" class="input" placeholder="לא חובה"></div>
+      </div>
+
+      <div style="margin-top:14px">
+        <label class="label">טלפון לחזרה</label>
+        <input id="cPhone" class="input" type="tel" inputmode="tel" placeholder="לא חובה, אם תעדיף שנתקשר">
+      </div>
+
+      <div style="margin-top:14px">
+        <label class="label">פרטי הפנייה</label>
+        <textarea id="cMsg" class="input" rows="5" placeholder="ככל שתפרט יותר, כך נוכל לענות מהר יותר"></textarea>
+        <div class="fieldErr" id="cErr"></div>
+      </div>
+
+      <button class="btn wa full" onclick="sendContact()">שליחת הפנייה בוואטסאפ</button>
+      <p class="contactNote">הפנייה נפתחת בוואטסאפ עם כל הפרטים מוכנים. לא נשמר מידע באתר.</p>
+    </div>
+
+    <aside class="contactSide">
+      <div class="contactCard">
+        <b>ליצירת קשר ישירה</b>
+        <p>להזמנות דחופות ולבירור מלאי, פנייה ישירה מהירה יותר.</p>
+        <a class="btn wa waLink" target="_blank" rel="noopener">וואטסאפ</a>
+        <a class="contactPhone" id="contactPhoneLink"></a>
+      </div>
+      <div class="contactCard">
+        <b>לפני שפונים</b>
+        <ul class="contactTips">
+          <li>לבירור מלאי, ציין את שם הדגם והטעם המבוקש.</li>
+          <li>להזמנה, ציין כמות ואת שם בית העסק.</li>
+          <li>לתקלה במוצר, ציין מק״ט ומועד רכישה משוער.</li>
+        </ul>
+      </div>
+      <div class="contactCard areaCard" id="contactArea"></div>
+    </aside>
+  </div>
+
+  <div class="legalBack"><a class="btn ghost" href="#" onclick="closeContact();return false">חזרה לקטלוג</a></div>
+</div></section>
+
+
+<!-- ===== עגלה ===== -->
+
+<!-- ===== תפריט שלושת הפסים ===== -->
+
+<!-- ===== נגישות ===== -->
+<button class="a11yBtn" id="a11yBtn" onclick="toggleA11yMenu()" aria-label="הגדרות נגישות" aria-expanded="false" aria-controls="a11yPanel">
+  <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="4" r="2"/><path d="M12 7c-2.5 0-5 .5-7 1v2c1.6-.4 3.3-.7 5-.8V13l-2.5 7h2.2l2.3-6 2.3 6h2.2L16 13V9.2c1.7.1 3.4.4 5 .8V8c-2-.5-4.5-1-7-1z"/></svg>
+</button>
+<div class="a11yPanel" id="a11yPanel" role="dialog" aria-label="הגדרות נגישות">
+  <div class="a11yHead"><b>הגדרות נגישות</b><button class="iconBtn" onclick="closeA11yMenu()" aria-label="סגירה">✕</button></div>
+  <div class="a11yRow">
+    <span>גודל טקסט</span>
+    <div class="a11yFont">
+      <button data-a11y="font-" onclick="setA11y('font-')" aria-label="הקטנת טקסט">−</button>
+      <span id="a11yFontLabel">100%</span>
+      <button data-a11y="font+" onclick="setA11y('font+')" aria-label="הגדלת טקסט">+</button>
+    </div>
+  </div>
+  <button class="a11yOpt" data-a11y="contrast" onclick="setA11y('contrast')" aria-pressed="false">ניגודיות גבוהה</button>
+  <button class="a11yOpt" data-a11y="links" onclick="setA11y('links')" aria-pressed="false">הדגשת קישורים</button>
+  <button class="a11yOpt" data-a11y="motion" onclick="setA11y('motion')" aria-pressed="false">עצירת אנימציות</button>
+  <button class="a11yOpt" data-a11y="readable" onclick="setA11y('readable')" aria-pressed="false">גופן קריא</button>
+  <button class="a11yOpt reset" data-a11y="reset" onclick="setA11y('reset')">איפוס הגדרות</button>
+  <a class="a11yLink" href="#accessibility" onclick="openAccessibility();return false">הצהרת נגישות</a>
+</div>
+
+<div class="menuPanel" id="menuPanel">
+  <div class="menuBackdrop" onclick="closeMenu()"></div>
+  <nav class="menuBox">
+    <header class="menuHead">
+      <b>תפריט</b>
+      <button class="iconBtn" onclick="closeMenu()" aria-label="סגור">✕</button>
+    </header>
+    <div class="menuLinks" id="menuLinks"></div>
+    <footer class="menuFoot">
+      <a class="btn wa waLink full" target="_blank" rel="noopener">וואטסאפ</a>
+    </footer>
+  </nav>
+</div>
+
+<div class="cartPanel" id="cartPanel">
+  <div class="cartBackdrop" onclick="closeCart()"></div>
+  <aside class="cartBox">
+    <header class="cartHead">
+      <b>העגלה שלי</b>
+      <button class="iconBtn" onclick="closeCart()" aria-label="סגור">✕</button>
+    </header>
+
+    <div class="cartBody">
+      <div id="cartLines"></div>
+
+      <div id="cartFoot" class="hidden">
+        <div class="cartSection">
+          <b>מועד אספקה</b>
+          <div class="whenRow">
+            <button type="button" class="whenBtn on" data-when="now" onclick="pickWhen('now')">משלוח מיידי</button>
+            <button type="button" class="whenBtn" data-when="later" onclick="pickWhen('later')">הזמנה עתידית</button>
+          </div>
+          <div class="grid2 hidden" id="whenFields" style="margin-top:10px">
+            <div><label class="label">תאריך</label><input id="orderDate" type="date" class="input"></div>
+            <div><label class="label">שעה</label><input id="orderTime" type="time" class="input"></div>
+          </div>
+        </div>
+
+        <div class="cartSection">
+          <b>אמצעי תשלום מבוקש</b>
+          <div class="payRow">
+            <button type="button" class="payBtn on" data-pay="ביט" onclick="pickPay('ביט')">ביט</button>
+            <button type="button" class="payBtn" data-pay="כרטיס אשראי" onclick="pickPay('כרטיס אשראי')">אשראי</button>
+            <button type="button" class="payBtn" data-pay="Apple Pay" onclick="pickPay('Apple Pay')">Apple Pay</button>
+            <button type="button" class="payBtn" data-pay="Google Pay" onclick="pickPay('Google Pay')">Google Pay</button>
+            <button type="button" class="payBtn" data-pay="מזומן" onclick="pickPay('מזומן')">מזומן</button>
+            <button type="button" class="payBtn" data-pay="העברה בנקאית" onclick="pickPay('העברה בנקאית')">העברה</button>
+          </div>
+          <p class="payNote">התשלום נסגר מול נציג לאחר אישור ההזמנה והמלאי. אין גבייה באתר ואין מסירת פרטי כרטיס בו.</p>
+        </div>
+
+        <div class="cartSection">
+          <label class="label">הערות להזמנה</label>
+          <textarea id="orderNote" class="input" rows="2" placeholder="לא חובה"></textarea>
+        </div>
+      </div>
+    </div>
+
+    <footer class="cartBar">
+      <div class="comboBox hidden" id="comboBox"></div>
+      <div class="cartTotalRow subRow hidden" id="cartSubRow"><span>מחיר מחירון</span><s id="cartSubtotal"></s></div>
+      <div class="cartTotalRow"><span>סה״כ לפני מע״מ</span><b id="cartTotal">—</b></div>
+      <button class="btn wa full" onclick="submitOrder()">שליחת ההזמנה בוואטסאפ</button>
+      <button class="btn ghost full" onclick="clearCart()" style="margin-top:8px">רוקן עגלה</button>
+    </footer>
+  </aside>
+</div>
+
+<div class="mobileBar" id="mobileBar">
+  <button onclick="goCatalog()">קטלוג</button>
+  <button onclick="openBiz()">לעסקים</button>
+  <button class="cartMob" onclick="openCart()">עגלה<span class="cartCount hidden">0</span></button>
+</div>
+
+<footer class="footer" role="contentinfo"><div class="wrap">
+  <b id="footerBrand">המעשנת</b>
+  <div style="margin-top:8px" id="footerText"></div>
+  <div style="margin-top:14px">
+    <a class="btn wa waLink" target="_blank" rel="noopener">להזמנות ומשלוחים בוואטסאפ</a>
+    <span id="footerPhone" style="margin-inline-start:10px"></span>
+  </div>
+  <div class="footLinks">
+    <a href="#takanon" onclick="openTerms();return false">תקנון ותנאי שימוש</a>
+    <a href="#accessibility" onclick="openAccessibility();return false" style="margin-inline-start:16px">הצהרת נגישות</a>
+    <a href="#contact" onclick="openContact();return false" style="margin-inline-start:16px">צור קשר</a>
+  </div>
+  <div class="areaNote" id="areaNote"></div>
+  <div class="buildStamp" id="buildStamp"></div>
+</div></footer>
+
+<!-- ===== פאנל הניהול. מוסתר כברירת מחדל ונפתח רק דרך כתובת #admin ===== -->
+<div class="adminOverlay hidden" id="adminOverlay">
+  <div class="adminTop"><div class="wrap adminTopRow">
+    <b>ניהול האתר</b>
+    <span class="serverState" id="serverState"></span>
+      <span class="saveState hidden" id="saveState"></span>
+    </div>
+    <div class="adminTopBtns">
+      <button class="btn ghost" onclick="changeAdminPass()">החלף סיסמה</button>
+      <button class="btn ghost" onclick="adminLogout()">התנתק</button>
+      <button class="btn primary" onclick="closeAdmin()">סגור</button>
+    </div>
+  </div></div>
+  <div class="wrap adminLayout">
+    <aside class="side">
+      <button class="active" data-page="dashboard" onclick="switchAdmin('dashboard',this)">סקירה</button>
+      <button data-page="deals" onclick="switchAdmin('deals',this)">קטלוג ומחירון</button>
+      <button data-page="products" onclick="switchAdmin('products',this)">רשימה ישנה</button>
+      <button data-page="categories" onclick="switchAdmin('categories',this)">קטגוריות</button>
+      <button data-page="homepage" onclick="switchAdmin('homepage',this)">דף הבית</button>
+      <button data-page="business" onclick="switchAdmin('business',this)">פרטי העסק</button>
+      <button data-page="design" onclick="switchAdmin('design',this)">עיצוב</button>
+      <button data-page="backup" onclick="switchAdmin('backup',this)">גיבוי וייבוא</button>
+    </aside>
+    <section>
+      <div class="adminPage active" id="page-dashboard">
+        <div class="sectionHead"><div><h2>סקירה</h2><p>מצב הקטלוג במבט אחד.</p></div></div>
+        <div class="adminStats">
+          <div class="stat"><b id="dashProducts">0</b><span>מוצרים</span></div>
+          <div class="stat"><b id="dashCats">0</b><span>קטגוריות</span></div>
+          <div class="stat"><b id="dashStock">0</b><span>יחידות במלאי</span></div>
+          <div class="stat"><b id="dashFlavorsOut">0</b><span>טעמים שאזלו</span></div>
+        </div>
+
+        <div class="adminCard" style="margin-top:20px">
+          <h3>פעולות מהירות</h3>
+          <div class="adminActions">
+            <button class="btn primary" onclick="openProductModal()">+ מוצר חדש</button>
+            <button class="btn ghost" onclick="switchAdmin('homepage',document.querySelector('[data-page=homepage]'))">עריכת דף הבית</button>
+            <button class="btn ghost" onclick="exportData()">הורדת גיבוי</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="adminPage" id="page-products">
+        <div class="legalNote" style="margin-bottom:18px">
+          <b>הרשימה הישנה, אינה מוצגת באתר</b>
+          <p>אלה 17 המוצרים שנבנו בשלב הראשון, ללא מחירים. הקטלוג שבדף הבית מנוהל בלשונית "קטלוג ומחירון". הרשימה נשמרת כאן לגיבוי בלבד, ואפשר למחוק אותה כשלא תהיה נחוצה.</p>
+        </div><div class="publishBar">
+  <div class="publishTxt">
+    <b>פרסום שינויים</b>
+    <p>העריכה נשמרת בדפדפן הזה בלבד. כדי שהלקוחות יראו אותה, הורד את קובץ הנתונים והחלף בו את הקובץ src/data.json במאגר.</p>
+  </div>
+  <div class="publishBtns">
+    <button class="btn primary" onclick="publishData()">הורד קובץ נתונים</button>
+    <button class="btn ghost" onclick="changeAdminPass()">החלף סיסמה</button>
+    <button class="btn ghost" onclick="adminLogout()">התנתק</button>
+    <label class="btn ghost">טען קובץ<input type="file" accept="application/json" onchange="loadDataFile(event)" hidden></label>
+  </div>
+</div>
+
+        <div class="adminCard">
+          <div class="sectionHead"><div><h2>מוצרים</h2><p>עריכה, שכפול ומחיקה.</p></div><button class="btn primary" onclick="openProductModal()">+ הוסף מוצר</button></div>
+          <div style="overflow:auto"><table class="prodTable"><thead><tr><th>תמונה</th><th>מוצר</th><th>מחיר</th><th>קטגוריה</th><th>מלאי</th><th>טעמים</th><th>פעולות</th></tr></thead><tbody id="adminProducts"></tbody></table></div>
+        </div>
+      </div>
+
+      <div class="adminPage" id="page-deals">
+        <div class="sectionHead"><div><h2>קטלוג ומחירון</h2><p>המוצרים שמוצגים בדף הבית ובעמוד האביזרים. מחיר קודם יוצג עם קו חוצה ואחוז ההנחה יחושב לבד.</p></div></div>
+        <div class="adminCard">
+          <h3>שם הלשונית</h3>
+          <div class="grid2">
+            <div class="toggleRow">
+              <label class="switch"><input type="checkbox" id="setCatalogVisible" onchange="toggleCatalogVisible()"><span></span></label>
+              <div>
+                <b>הצגת הקטלוג שבדף הבית</b>
+                <p>כיבוי מסתיר את מקטע המוצרים מדף הבית ומהתפריטים. הנתונים נשמרים ואפשר להחזיר בכל רגע.</p>
+              </div>
+            </div>
+          </div>
+          <div class="grid2" style="margin-top:12px">
+            <div><label class="label">שם עמוד המחירון</label><input id="setDealsTitle" class="input" placeholder="מבצעים"></div>
+            <div><label class="label">משפט הסבר</label><input id="setDealsSubtitle" class="input"></div>
+          </div>
+          <div class="grid2" style="margin-top:12px">
+            <div><label class="label">שם עמוד הצעצועים</label><input id="setToysTitle" class="input" placeholder="צעצועים"></div>
+            <div><label class="label">משפט הסבר</label><input id="setToysSubtitle" class="input"></div>
+          </div>
+          <div class="grid2" style="margin-top:12px">
+            <div><label class="label">שם הקטלוג לעסקים</label><input id="setBizTitle" class="input" placeholder="קטלוג לעסקים"></div>
+            <div><label class="label">משפט הסבר</label><input id="setBizSubtitle" class="input"></div>
+          </div>
+          <div class="grid2" style="margin-top:12px">
+            <div><label class="label">שם עמוד האביזרים</label><input id="setAccTitle" class="input" placeholder="אביזרי סלולר"></div>
+            <div><label class="label">משפט הסבר</label><input id="setAccSubtitle" class="input"></div>
+          </div>
+          <div class="adminActions"><button class="btn primary" onclick="saveDealsSettings()">שמור</button></div>
+        </div>
+        <div class="adminCard" style="margin-top:20px">
+          <div class="collTabs" id="collTabs">
+            <button data-coll="deals" class="on" onclick="switchCollection('deals')">קטלוג דף הבית</button>
+            <button data-coll="business" onclick="switchCollection('business')">קטלוג לעסקים</button>
+            <button data-coll="accessories" onclick="switchCollection('accessories')">אביזרי סלולר</button>
+            <button data-coll="toys" onclick="switchCollection('toys')">צעצועים</button>
+          </div>
+          <div class="adminActions"><button class="btn primary" onclick="openDealModal()">+ פריט חדש</button></div>
+          <div class="tableWrap"><table class="adminTable">
+            <thead><tr><th>תמונה</th><th>שם</th><th>מחיר קודם</th><th>מחיר מבצע</th><th>הנחה</th><th>פעולות</th></tr></thead>
+            <tbody id="adminDeals"></tbody>
+          </table></div>
+        </div>
+      </div>
+      <div class="adminPage" id="page-categories">
+        <div class="adminCard">
+          <h2>קטגוריות</h2>
+          <div class="grid2" style="margin-top:16px">
+            <div><label class="label">שם קטגוריה חדשה</label><input id="newCat" class="input" placeholder="לדוגמה: אביזרים"></div>
+            <div style="align-self:end"><button class="btn primary" onclick="addCategory()">הוסף קטגוריה</button></div>
+          </div>
+          <div id="adminCats" style="margin-top:18px"></div>
+        </div>
+      </div>
+
+      <div class="adminPage" id="page-homepage">
+        <div class="adminCard">
+          <h2>דף הבית</h2>
+          <div class="grid2" style="margin-top:16px">
+            <div><label class="label">שורת כותרת קטנה</label><input id="setHeroEyebrow" class="input"></div>
+            <div><label class="label">כותרת ראשית</label><input id="setHeroTitle" class="input"></div>
+            <div><label class="label">כותרת עמוד הפנייה</label><input id="setContactTitle" class="input"></div>
+            <div><label class="label">טקסט בעמוד הפנייה</label><input id="setContactText" class="input"></div>
+          </div>
+          <div style="margin-top:12px"><label class="label">טקסט ראשי</label><textarea id="setHeroText" class="textarea"></textarea></div>
+          <div class="grid2" style="margin-top:12px">
+            <div><label class="label">כותרת אודות</label><input id="setAboutTitle" class="input"></div>
+            <div><label class="label">טקסט אודות</label><input id="setAboutText" class="input"></div>
+          </div>
+          <div class="adminActions"><button class="btn primary" onclick="saveHomepage()">שמור שינויים</button></div>
+        </div>
+      </div>
+
+      <div class="adminPage" id="page-business">
+        <div class="adminCard">
+          <h2>פרטי העסק</h2>
+          <div class="grid2" style="margin-top:16px">
+            <div><label class="label">שם העסק</label><input id="setBusinessName" class="input"></div>
+            <div><label class="label">שורת משנה</label><input id="setBusinessSub" class="input"></div>
+            <div><label class="label">טלפון</label><input id="setPhone" class="input"></div>
+            <div><label class="label">אימייל</label><input id="setEmail" class="input"></div>
+            <div><label class="label">מספר וואטסאפ בפורמט בינלאומי</label><input id="setWhatsapp" class="input" placeholder="972536364744"></div>
+            
+          </div>
+          <div style="margin-top:12px"><label class="label">טקסט בפוטר</label><input id="setFooterText" class="input"></div>
+          <div style="margin-top:12px"><label class="label">לוגו</label><input type="file" accept="image/*" class="input" onchange="uploadLogo(event)"><img id="logoPreview" class="previewLogo hidden"></div>
+          <div class="adminActions"><button class="btn primary" onclick="saveBusiness()">שמור פרטים</button></div>
+        </div>
+      </div>
+
+      <div class="adminPage" id="page-design">
+        <div class="adminCard">
+          <h2>עיצוב וצבעים</h2>
+          <div class="grid3" style="margin-top:16px">
+            <div><label class="label">צבע ראשי</label><div class="colorRow"><input id="setPrimary" type="color"><input id="setPrimaryText" class="input"></div></div>
+            <div><label class="label">צבע משני</label><div class="colorRow"><input id="setSecondary" type="color"><input id="setSecondaryText" class="input"></div></div>
+            <div><label class="label">צבע הדגשה</label><div class="colorRow"><input id="setAccent" type="color"><input id="setAccentText" class="input"></div></div>
+          </div>
+          <div class="adminActions"><button class="btn primary" onclick="saveDesign()">החל צבעים</button><button class="btn ghost" onclick="resetDesign()">חזור לברירת מחדל</button></div>
+        </div>
+      </div>
+
+      <div class="adminPage" id="page-backup">
+        <div class="adminCard">
+          <h2>גיבוי וייבוא</h2>
+          <p style="color:var(--muted)">מומלץ להוריד גיבוי לאחר שינויים גדולים. אפשר להעביר את הקובץ למכשיר אחר ולהחזיר את כל הנתונים.</p>
+          <div class="adminActions">
+            <button class="btn primary" onclick="exportData()">הורד גיבוי JSON</button>
+            <label class="btn ghost" style="cursor:pointer">ייבא גיבוי JSON<input type="file" accept="application/json" hidden onchange="importData(event)"></label>
+            <button class="btn ghost" onclick="exportCSV()">ייצוא מוצרים CSV</button>
+            <label class="btn ghost" style="cursor:pointer">ייבוא מוצרים CSV<input type="file" accept=".csv,text/csv" hidden onchange="importCSV(event)"></label>
+            <button class="btn danger" onclick="resetAll()">איפוס הגדרות</button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>
+  </div>
+</div>
+
+<div class="modal" id="productModal"><div class="modalBox">
+  <div class="modalHead"><h3 id="productModalTitle">מוצר חדש</h3><button class="close" onclick="closeProductModal()">×</button></div>
+  <div class="grid2" style="margin-top:16px">
+    <div><label class="label">שם מוצר</label><input id="pName" class="input"></div>
+    <div><label class="label">מק״ט</label><input id="pSku" class="input"></div>
+    <div><label class="label">מחיר</label><input id="pPrice" type="number" step="0.01" class="input"></div>
+    <div><label class="label">מחיר קודם / מחירון</label><input id="pOldPrice" type="number" step="0.01" class="input"></div>
+    <div><label class="label">קטגוריה</label><select id="pCategory" class="select"></select></div>
+    <div><label class="label">מותג</label><input id="pBrand" class="input"></div>
+    <div><label class="label">מלאי</label><input id="pStock" type="number" class="input"></div>
+    <div><label class="label">תגית</label><input id="pBadge" class="input" placeholder="חדש / מבצע"></div>
+  </div>
+  <div style="margin-top:12px"><label class="label">תיאור</label><textarea id="pDesc" class="textarea"></textarea></div>
+  <div class="flavBlock">
+    <div class="flavBlockHead"><label class="label" style="margin:0">טעמים — סמן "אזל" לכל טעם שנגמר</label>
+      <div style="display:flex;gap:6px"><button class="iconBtn" onclick="allFlavorsIn()">הכל במלאי</button><button class="iconBtn" onclick="allFlavorsOut()">הכל אזל</button></div>
+    </div>
+    <div id="flavorEditor" class="flavEditor"></div>
+    <div class="flavAdd"><input id="newFlavor" class="input" placeholder="שם טעם חדש, אפשר כמה מופרדים בפסיק"><button class="btn ghost" onclick="addFlavor()">הוסף</button></div>
+  </div>
+  <div class="grid2" style="margin-top:12px">
+    <div><label class="label">קישור לתמונה</label><div class="imgPreview" id="pImgPreview" style="margin-bottom:8px"></div><input id="pImage" class="input" placeholder="https://..."></div>
+    <div><label class="label">או העלאת תמונה מהמכשיר</label><input id="pUpload" type="file" accept="image/*" class="input" onchange="productImageUpload(event)"></div>
+  </div>
+  <div class="adminActions"><button class="btn primary" onclick="saveProduct()">שמור מוצר</button><button class="btn ghost" onclick="closeProductModal()">ביטול</button></div>
+</div></div>
+
+
+<div class="modal" id="dealModal"><div class="modalBox">
+  <h3 id="dealModalTitle">פריט מבצע</h3>
+  <input type="hidden" id="dId">
+  <div class="grid2">
+    <div><label class="label">שם הפריט</label><input id="dName" class="input"></div>
+    <div><label class="label">מק״ט</label><input id="dSku" class="input"></div>
+  </div>
+  <div class="grid2" style="margin-top:12px">
+    <div><label class="label">מחיר קודם</label><input id="dOldPrice" type="number" step="0.01" class="input" placeholder="יוצג עם קו חוצה"></div>
+    <div><label class="label">מחיר מבצע</label><input id="dPrice" type="number" step="0.01" class="input"></div>
+  </div>
+  <div style="margin-top:12px"><label class="label">תיאור</label><textarea id="dDesc" class="input" rows="3"></textarea></div>
+  <div class="grid2" style="margin-top:12px">
+    <div class="comboCheck">
+      <label class="switch"><input type="checkbox" id="dCombo"><span></span></label>
+      <div><b>משתתף במבצע 2 ב־100</b><p>סימון מציג את הפריט בעמוד המבצע. כל שני פריטים מסומנים יחויבו 100 שקלים לזוג, אלא אם המחיר הרגיל זול יותר.</p></div>
+    </div>
+    <div><label class="label">שייך לעמוד</label><select id="dCollection" class="input"><option value="deals">קטלוג דף הבית</option><option value="business">קטלוג לעסקים</option>
+<option value="accessories">אביזרי סלולר</option>
+<option value="toys">צעצועים</option></select></div>
+    <div><label class="label">סוג</label><input id="dCategory" class="input" list="dCatList" placeholder="למשל: חד־פעמי"><datalist id="dCatList"></datalist></div>
+    <div><label class="label">מותג</label><input id="dBrand" class="input"></div>
+  </div>
+  <div class="grid2" style="margin-top:12px">
+    <div><label class="label">מלאי</label><input id="dStock" type="number" class="input" placeholder="0 = לבירור מלאי"></div>
+    <div><label class="label">תווית</label><input id="dBadge" class="input" placeholder="למשל: מוגבל למלאי"></div>
+  </div>
+
+  <div class="flavBlock">
+    <div class="flavBlockHead"><label class="label" style="margin:0">טעמים — סמן "אזל" לכל טעם שנגמר</label>
+      <div style="display:flex;gap:6px">
+        <button class="iconBtn" onclick="allDealFlavorsIn()">הכל במלאי</button>
+        <button class="iconBtn" onclick="allDealFlavorsOut()">הכל אזל</button>
+      </div>
+    </div>
+    <div id="dealFlavorEditor" class="flavEditor"></div>
+    <div class="flavAdd"><input id="newDealFlavor" class="input" placeholder="שם טעם חדש, אפשר כמה מופרדים בפסיק"><button class="btn ghost" onclick="addDealFlavor()">הוסף</button></div>
+  </div>
+
+  <div style="margin-top:14px">
+    <label class="label">תמונה</label>
+    <div class="imgField">
+      <div class="imgPreview" id="dImgPreview"></div>
+      <div class="imgBtns">
+        <label class="btn ghost">העלאת תמונה<input id="dUpload" type="file" accept="image/*" hidden onchange="dealImageUpload(event)"></label>
+        <button class="btn ghost" onclick="clearDealImage()">הסרת תמונה</button>
+      </div>
+    </div>
+    <input id="dImage" class="input" style="margin-top:8px" placeholder="או קישור לתמונה" oninput="renderDealImgPreview()">
+  </div>
+  <div class="adminActions"><button class="btn primary" onclick="saveDeal()">שמור</button><button class="btn ghost" onclick="closeDealModal()">ביטול</button></div>
+</div></div>
+
+<div class="toast" id="toast">נשמר</div>
