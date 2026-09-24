@@ -302,6 +302,26 @@ const chk=(name,cond,extra='')=>{ if(cond){pass++;console.log('  ✓ '+name);} e
  chk('סה״כ לתשלום מופיע', /סה״כ לתשלום/.test(om));
  w.clearCart(); await wait(150); w.closeCart(); await wait(100);
 
+
+ console.log('\n== עמוד הצעצועים ==');
+ chk('העמוד קיים', !!d.getElementById('toys'));
+ chk('אינו בזרימת דף הבית', !d.getElementById('toys').closest('main'));
+ w.openToys(); await wait(250);
+ chk('נפתח כעמוד עצמאי', d.body.classList.contains('showToys'));
+ chk('יש לו באנר משלו', !!d.querySelector('.toysHero h1'));
+ chk('יש אזור קטגוריות', !!d.getElementById('toysCatGrid'));
+ chk('יש חיפוש', !!d.getElementById('toysSearch'));
+ chk('עיצוב נפרד מהאתר', !!d.querySelector('.toysPage .tBtnMain'));
+ w.closeToys(); await wait(150);
+ chk('סגירה מחזירה לאתר', !d.body.classList.contains('showToys'));
+
+ console.log('\n== כרטיסי מוצר במסך צר ==');
+ const cssAll=[...d.querySelectorAll('style')].map(x=>x.textContent).join('').replace(/\s+/g,'');
+ chk('שורת המחיר והכפתור עוטפת', /\.toyFoot\{[^}]*flex-wrap:wrap/.test(cssAll) && /\.accFoot\{[^}]*flex-wrap:wrap/.test(cssAll));
+ chk('במסך צר הכפתור עובר לשורה נפרדת', /@media\(max-width:760px\)\{[^@]*flex-direction:column/.test(cssAll));
+ chk('הכפתור ברוחב מלא ולא נחתך', /\.toyAdd,\.accAdd\{width:100%/.test(cssAll));
+ chk('שטח המגע בכפתור תקין', /\.toyAdd\{[^}]*min-height:44px/.test(cssAll));
+
  console.log('\n== מבנה דף הבית ==');
  const order=[...d.querySelectorAll('main > section')].map(x=>x.id).filter(Boolean);
  chk('סדר המקטעים נכון', JSON.stringify(order.slice(0,5))===JSON.stringify(['catalog','combo','business','accessories','categories']), order.join(' > '));

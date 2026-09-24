@@ -542,8 +542,8 @@ document.addEventListener('keydown', e => {
    נשמרת בדפדפן של הלקוח בלבד. בסיום ההזמנה מורכבת הודעת וואטסאפ
    מסודרת עם כל הפריטים, מועד האספקה ואמצעי התשלום המבוקש.
    התשלום עצמו אינו מתבצע באתר. ראו הערה בעמוד העגלה. */
-const BUILD_ID = 'B09232042';
-const BUILD_DATE = '23.09.2026 20:42';
+const BUILD_ID = 'B09241908';
+const BUILD_DATE = '24.09.2026 19:08';
 const CART_KEY = 'hameashenet_cart_v1';
 let cart = loadCart();
 
