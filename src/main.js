@@ -78,6 +78,7 @@ async function loadData() {
     desc: d.description, badge: d.badge, image: d.image_url,
     category: d.category || '', brand: d.brand || '', stock: d.stock || 0,
     collection: d.collection || 'deals',
+    images: Array.isArray(d.images) ? d.images.filter(Boolean) : [],
     combo: d.combo === true,
     flavors: Array.isArray(d.flavors) ? d.flavors : [],
     sort_order: d.sort_order,
@@ -105,6 +106,11 @@ function waProduct(id) {
 function itemById(id) {
   return data.products.find(x => String(x.id) === String(id))
       || dealsList().find(x => String(x.id) === String(id));
+}
+function pickFlavorAt(id, i) {
+  const it = itemById(id);
+  const f = it && (it.flavors || [])[i];
+  if (f) pickFlavor(id, f.n);
 }
 function pickFlavor(id, name) {
   const p = itemById(id);
@@ -144,10 +150,10 @@ function flavorChips(p) {
   const list = p.flavors || [];
   if (!list.length) return '';
   const sel = picked[p.id] || null;
-  const chips = list.map(f => {
+  const chips = list.map((f, i) => {
     const cls = 'flav' + (f.out ? ' out' : '') + (sel === f.n ? ' on' : '');
-    const safe = esc(f.n).replace(/'/g, "\\'");
-    const click = f.out ? '' : ` onclick="pickFlavor('${p.id}','${safe}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();pickFlavor('${p.id}','${safe}')}" tabindex="0" role="radio" aria-checked="${sel === f.n}"`;
+    /* מיקום ברשימה ולא שם, כדי שגרש או מרכאות בשם לא ישברו את הלחיצה */
+    const click = f.out ? '' : ` onclick="pickFlavorAt('${p.id}',${i})" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();pickFlavorAt('${p.id}',${i})}" tabindex="0" role="radio" aria-checked="${sel === f.n}"`;
     const ttl = f.out ? ' title="אזל מהמלאי"' : '';
     return `<span class="${cls}"${click}${ttl}>${esc(f.n)}${f.out ? ' ✕' : ''}</span>`;
   }).join('');
@@ -210,7 +216,7 @@ function applySettings() {
   setText('buildStamp', 'גרסה ' + BUILD_ID + ' · ' + BUILD_DATE);
 
   const lm = document.getElementById('logoMark');
-  lm.innerHTML = `<img src="${esc(s.logo || brandLogo)}" alt="${esc(s.business_name || '')}">`;
+  lm.innerHTML = `<img src="${esc(s.logo || brandLogo)}" alt="${esc(s.business_name || 'לוגו העסק')}">`;
 
   document.querySelectorAll('.waLink').forEach(a => {
     a.href = waGeneral();
@@ -225,7 +231,7 @@ function renderCategories() {
   const box = document.getElementById('categoryCards');
   const icons = ['◈', '✦', '⬡', '✺'];
   box.innerHTML = data.categories.map((c, i) =>
-    `<div class="cat" onclick="filterCategory('${esc(c).replace(/'/g, "\\'")}')">
+    `<div class="cat" onclick="filterCategoryAt(${i})">
       <div class="icon">${icons[i % 4]}</div>
       <h3>${esc(c)}</h3>
       <p>${catalogItems().filter(p => p.category === c).length} מוצרים</p>
@@ -244,6 +250,8 @@ function renderCategories() {
   setText('dashCats', data.categories.length);
 }
 
+/* בחירה לפי מיקום, כדי ששם עם גרש לא ישבור את הלחיצה */
+function filterCategoryAt(i) { filterCategory(data.categories[i]); }
 function filterCategory(c) {
   document.getElementById('catFilter').value = c;
   renderProducts();
@@ -301,7 +309,7 @@ function renderAdminProducts() {
     const fl = p.flavors || [];
     const out = fl.filter(f => f.out).length;
     return `<tr>
-      <td>${p.image ? `<img class="miniImg" src="${esc(p.image)}">` : `<div class="miniImg" style="display:grid;place-items:center">◈</div>`}</td>
+      <td>${p.image ? `<img class="miniImg" src="${esc(p.image)}" alt="${esc(p.name)}">` : `<div class="miniImg" style="display:grid;place-items:center">◈</div>`}</td>
       <td><b>${esc(p.name)}</b><div style="color:var(--muted);font-size:11px">${esc(p.sku)}</div></td>
       <td>${fmt(p.price)}</td>
       <td>${esc(p.category)}</td>
@@ -317,10 +325,10 @@ function renderAdminProducts() {
 }
 
 function renderAdminCats() {
-  document.getElementById('adminCats').innerHTML = data.categories.map(c =>
+  document.getElementById('adminCats').innerHTML = data.categories.map((c, i) =>
     `<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)">
       <span>${esc(c)} <small style="color:var(--muted)">(${catalogItems().filter(p => p.category === c).length})</small></span>
-      <button class="iconBtn" onclick="deleteCategory('${esc(c).replace(/'/g, "\\'")}')">מחק</button>
+      <button class="iconBtn" onclick="deleteCategoryAt(${i})">מחק</button>
     </div>`
   ).join('');
 }
@@ -554,8 +562,8 @@ document.addEventListener('keydown', e => {
    נשמרת בדפדפן של הלקוח בלבד. בסיום ההזמנה מורכבת הודעת וואטסאפ
    מסודרת עם כל הפריטים, מועד האספקה ואמצעי התשלום המבוקש.
    התשלום עצמו אינו מתבצע באתר. ראו הערה בעמוד העגלה. */
-const BUILD_ID = 'B09242018';
-const BUILD_DATE = '24.09.2026 20:18';
+const BUILD_ID = 'B09242114';
+const BUILD_DATE = '24.09.2026 21:14';
 const CART_KEY = 'hameashenet_cart_v1';
 let cart = loadCart();
 
@@ -831,6 +839,8 @@ function submitOrder() {
    עמוד עצמאי שאינו נגיש בגלילת דף הבית, עם עיצוב משלו.
    הפריטים יושבים באותו מנוע, תחת האוסף toys. */
 let toyCat = '';
+const TOY_PAGE = 24;   /* כמה מוצרים נטענים בכל פעם */
+let toyShown = TOY_PAGE;
 function toysItems() { return itemsOf('toys'); }
 function toyCategories() {
   const map = {};
@@ -840,12 +850,22 @@ function toyCategories() {
   });
   return map;
 }
+let toyCatNames = [];
+/* בחירה לפי מיקום ברשימה ולא לפי השם. שם שמכיל גרש או מרכאות
+   שבר בעבר את פקודת הלחיצה, והקטגוריה הפסיקה להגיב. */
+function setToyCatAt(i) { setToyCat(i >= 0 ? (toyCatNames[i] || '') : ''); }
+
 function setToyCat(c) {
   toyCat = c;
+  toyShown = TOY_PAGE;               // חוזרים לתחילת הרשימה בכל סינון
   const btn = document.getElementById('toysClear');
   if (btn) btn.hidden = !c;
   renderToys();
   scrollToEl('toysListTitle', { behavior: 'smooth', block: 'start' });
+}
+function showMoreToys() {
+  toyShown += TOY_PAGE;
+  renderToys();
 }
 function renderToys() {
   const st = data.settings;
@@ -856,12 +876,13 @@ function renderToys() {
 
   const cats = toyCategories();
   const names = Object.keys(cats).sort((a, b) => a.localeCompare(b, 'he'));
+  toyCatNames = names;
   const cg = document.getElementById('toysCatGrid');
   if (cg) {
     cg.innerHTML = names.length ? names.map((n, i) => {
       const first = cats[n].find(x => x.image);
-      return `<button class="toysCat${toyCat === n ? ' on' : ''}" style="--tHue:${(i * 47) % 360}deg" onclick="setToyCat('${esc(n).replace(/'/g, "\\'")}')">
-        <span class="toysCatPic">${first ? `<img src="${esc(first.image)}" alt="">` : '<span class="toysCatDot"></span>'}</span>
+      return `<button class="toysCat${toyCat === n ? ' on' : ''}" style="--tHue:${(i * 47) % 360}deg" onclick="setToyCatAt(${i})">
+        <span class="toysCatPic">${first ? `<img src="${esc(first.image)}" alt="${esc(n)}">` : '<span class="toysCatDot"></span>'}</span>
         <span class="toysCatName">${esc(n)}</span>
         <span class="toysCatNum">${cats[n].length}</span>
       </button>`;
@@ -876,14 +897,25 @@ function renderToys() {
 
   const g = document.getElementById('toysGrid');
   if (!g) return;
+  /* מציגים מנה אחת בכל פעם. בניית מאות כרטיסים בבת אחת
+     תוקעת את הדפדפן בטלפון, וזה נראה כאילו הכפתור לא הגיב. */
+  const total = arr.length;
+  arr = arr.slice(0, toyShown);
+  const more = document.getElementById('toysMore');
+  if (more) {
+    more.classList.toggle('hidden', toyShown >= total);
+    more.textContent = 'הצגת עוד מוצרים · נותרו ' + Math.max(0, total - toyShown);
+  }
+  const counter = document.getElementById('toysCount');
+  if (counter) counter.textContent = total ? 'מוצג ' + arr.length + ' מתוך ' + total : '';
   g.innerHTML = arr.length ? arr.map(i => {
     const pct = discountPct(i);
     return `<article class="toyCard">
-      <div class="toyPic">${i.image ? `<img src="${esc(i.image)}" alt="${esc(i.name)}" loading="lazy">` : '<span class="toyNoPic"></span>'}
+      <div class="toyPic cardOpen" role="link" tabindex="0" onclick="openProduct('${i.id}','toys')" onkeydown="if(event.key==='Enter'){openProduct('${i.id}','toys')}">${i.image ? `<img src="${esc(i.image)}" alt="${esc(i.name)}" loading="lazy">` : '<span class="toyNoPic"></span>'}
         ${pct ? `<span class="toyPct">${pct}%-</span>` : ''}
         ${i.badge ? `<span class="toyBadge">${esc(i.badge)}</span>` : ''}</div>
       <div class="toyBody">
-        <h3>${esc(String(i.name).split('|')[0].trim())}</h3>
+        <h3 class="cardOpen" role="link" tabindex="0" onclick="openProduct('${i.id}','toys')" onkeydown="if(event.key==='Enter'){openProduct('${i.id}','toys')}">${esc(String(i.name).split('|')[0].trim())}</h3>
         ${i.desc ? `<p>${esc(i.desc)}</p>` : ''}
         <div class="toyFoot">
           <div class="toyPrice">${i.oldPrice ? `<s>${fmt(i.oldPrice)}</s>` : ''}<b>${fmt(i.price)}</b></div>
@@ -894,17 +926,147 @@ function renderToys() {
   }).join('') : `<div class="toysEmpty">${toysItems().length ? 'לא נמצאו מוצרים מתאימים' : 'העמוד עדיין ריק. הוספת מוצרים נעשית בפאנל הניהול, באוסף הצעצועים.'}</div>`;
 }
 
+/* הקלדה בחיפוש מתחילה מחדש את הספירה */
+function resetToySearch() { toyShown = TOY_PAGE; renderToys(); }
+
 function openToys() {
   closeMenu(); closeA11yMenu();
   document.body.classList.remove('showTerms', 'showContact', 'showA11y', 'showDeals');
   document.body.classList.add('showToys');
   if (location.hash !== '#toys') history.pushState(null, '', '#toys');
+  toyShown = TOY_PAGE;
   window.scrollTo(0, 0);
   renderToys();
 }
 function closeToys() {
   document.body.classList.remove('showToys');
   if (location.hash === '#toys') history.pushState(null, '', location.pathname + location.search);
+}
+
+
+/* ===== עמוד מוצר =====
+   לכל מוצר כתובת משלו בתבנית #p/<מזהה>, כך שאפשר לשתף אותו.
+   העמוד משרת את כל סוגי המוצרים באתר. */
+let productPageCtx = 'deals';
+
+function anyItem(id) {
+  return dealsList().find(x => String(x.id) === String(id))
+      || data.products.find(x => String(x.id) === String(id));
+}
+function productUrl(id) {
+  return location.origin + location.pathname + '#p/' + encodeURIComponent(id);
+}
+
+function openProduct(id, page) {
+  const it = anyItem(id);
+  if (!it) return;
+  productPageCtx = page || it.collection || 'deals';
+  closeMenu(); closeA11yMenu(); closeCart();
+  document.body.classList.remove('showTerms', 'showContact', 'showA11y', 'showDeals', 'showToys');
+  document.body.classList.add('showProduct');
+  const want = '#p/' + encodeURIComponent(id);
+  if (location.hash !== want) history.pushState(null, '', want);
+  renderProduct(id);
+  window.scrollTo(0, 0);
+}
+function closeProduct() {
+  document.body.classList.remove('showProduct');
+  if (location.hash.startsWith('#p/')) history.pushState(null, '', location.pathname + location.search);
+}
+
+function renderProduct(id) {
+  const it = anyItem(id);
+  const box = document.getElementById('productView');
+  if (!box) return;
+  if (!it) { box.innerHTML = '<div class="emptyPage"><b>המוצר לא נמצא</b><p>ייתכן שהוא הוסר מהקטלוג.</p></div>'; return; }
+
+  const parts = String(it.name).split('|');
+  const he = parts[0].trim(), en = (parts[1] || '').trim();
+  const pct = discountPct(it);
+  const sel = picked[it.id] || '';
+  const flavors = it.flavors || [];
+  const imgs = itemImages(it);
+  const inStock = flavors.filter(f => !f.out);
+
+  box.innerHTML = `
+    <div class="pvGrid">
+      <div class="pvPic">
+        ${imgs.length ? `<img id="pvMainImg" src="${esc(imgs[0])}" alt="${esc(he)}">` : '<span class="pvNoPic"></span>'}
+        ${pct ? `<span class="pvPct">${pct}%-</span>` : ''}
+        ${it.badge ? `<span class="pvBadge">${esc(it.badge)}</span>` : ''}
+      </div>
+      ${imgs.length > 1 ? `<div class="pvThumbs">${imgs.map((u, i) =>
+        `<button class="pvThumb${i === 0 ? ' on' : ''}" onclick="setGalleryMain(${i},'${it.id}')" aria-label="תמונה ${i + 1}"><img src="${esc(u)}" alt=""></button>`
+      ).join('')}</div>` : ''}
+      <div class="pvInfo">
+        <div class="pvMeta">
+          <span class="pill">${esc(pageLabel(productPageCtx))}</span>
+          ${it.category ? `<span class="pill">${esc(it.category)}</span>` : ''}
+          ${it.sku ? `<span class="pill">מק״ט ${esc(it.sku)}</span>` : ''}
+        </div>
+        <h1>${esc(he)}</h1>
+        ${en ? `<div class="pvModel">${esc(en)}</div>` : ''}
+        ${it.desc ? `<p class="pvDesc">${esc(it.desc)}</p>` : ''}
+
+        <div class="pvPrice">
+          ${it.oldPrice ? `<s>${fmt(it.oldPrice)}</s>` : ''}
+          <b>${fmt(it.price)}</b>
+          <span class="priceNote">לפני מע״מ</span>
+        </div>
+
+        ${flavors.length ? `<div class="pvFlav">
+          <div class="flavHead">בחירת טעם <small>${sel ? 'נבחר: ' + esc(sel) : 'טעם אחד לכל הוספה · ' + inStock.length + ' מתוך ' + flavors.length + ' במלאי'}</small></div>
+          <div class="flavs">${flavors.map((f, fi) => {
+            const cls = 'flav' + (f.out ? ' out' : '') + (sel === f.n ? ' on' : '');
+            const act = f.out ? '' : ` onclick="pickFlavorOnPage('${it.id}',${fi})" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();pickFlavorOnPage('${it.id}',${fi})}" tabindex="0" role="radio" aria-checked="${sel === f.n}"`;
+            return `<span class="${cls}"${act}>${esc(f.n)}${f.out ? ' ✕' : ''}</span>`;
+          }).join('')}</div>
+        </div>` : ''}
+
+        <div class="pvBtns">
+          <button class="btn primary" onclick="addToCart('deal','${it.id}','${productPageCtx}')">הוספה לעגלה</button>
+          <button class="btn wa" onclick="waDeal('${it.id}')">שאלה בוואטסאפ</button>
+          <button class="btn ghost shareBtn" onclick="shareProduct('${it.id}')" aria-label="שיתוף המוצר">שיתוף</button>
+        </div>
+        <div class="pvShareNote" id="pvShareNote"></div>
+
+        <button class="btn ghost pvBack" onclick="closeProduct()">חזרה לקטלוג</button>
+      </div>
+    </div>`;
+}
+
+/* מעבר בין תמונות הגלריה בעמוד המוצר */
+function setGalleryMain(i, id) {
+  const it = anyItem(id);
+  const imgs = itemImages(it);
+  const main = document.querySelector('#productView #pvMainImg');
+  if (main && imgs[i]) main.src = imgs[i];
+  document.querySelectorAll('.pvThumb').forEach((b, n) => b.classList.toggle('on', n === i));
+}
+
+function pickFlavorOnPage(id, i) {
+  pickFlavorAt(id, i);
+  renderProduct(id);
+}
+
+/* שיתוף: תפריט השיתוף של המכשיר, ואם אינו קיים — העתקה ללוח */
+async function shareProduct(id) {
+  const it = anyItem(id);
+  const url = productUrl(id);
+  const title = it ? String(it.name).split('|')[0].trim() : 'מוצר';
+  const note = document.querySelector('#productView #pvShareNote');
+  const say = t => { if (note) { note.textContent = t; setTimeout(() => { if (note) note.textContent = ''; }, 2600); } toast(t); };
+
+  if (navigator.share) {
+    try { await navigator.share({ title, text: title, url }); return; }
+    catch (e) { if (e && e.name === 'AbortError') return; }
+  }
+  try {
+    await navigator.clipboard.writeText(url);
+    say('הקישור הועתק');
+  } catch (e) {
+    window.prompt('העתק את הקישור:', url);
+  }
 }
 
 /* ===== עמוד פנייה =====
@@ -917,8 +1079,8 @@ function renderContact() {
   const s = data.settings;
   const row = document.getElementById('topicRow');
   if (row) {
-    row.innerHTML = CONTACT_TOPICS.map(t =>
-      `<button type="button" class="topic${t === contactTopic ? ' on' : ''}" onclick="pickTopic('${esc(t).replace(/'/g, "\\'")}')">${esc(t)}</button>`
+    row.innerHTML = CONTACT_TOPICS.map((t, i) =>
+      `<button type="button" class="topic${t === contactTopic ? ' on' : ''}" onclick="pickTopicAt(${i})">${esc(t)}</button>`
     ).join('');
   }
   const ph = document.getElementById('contactPhoneLink');
@@ -937,6 +1099,7 @@ function renderContact() {
   setText('contactText', s.contact_text || '');
 }
 
+function pickTopicAt(i) { pickTopic(CONTACT_TOPICS[i]); }
 function pickTopic(t) { contactTopic = t; renderContact(); }
 
 function sendContact() {
@@ -990,8 +1153,10 @@ function discountPct(d) {
 function itemCardHTML(d, page) {
   const pct = discountPct(d);
   const parts = String(d.name).split('|');
+  const openArgs = `'${d.id}','${page || (d.collection || 'deals')}'`;
+  const gal = itemImages(d);
   return `<article class="deal">
-    <div class="pic">${d.image ? `<img src="${esc(d.image)}" alt="${esc(d.name)}">` : `<div class="tile" style="--tileHue:280deg"><span class="tileMark"></span><span class="tileName">${esc(d.name)}</span></div>`}
+    <div class="pic cardOpen" role="link" tabindex="0" onclick="openProduct(${openArgs})" onkeydown="if(event.key==='Enter'){openProduct(${openArgs})}">${gal.length ? `<img src="${esc(gal[0])}" alt="${esc(d.name)}">` : `<div class="tile" style="--tileHue:280deg"><span class="tileMark"></span><span class="tileName">${esc(d.name)}</span></div>`}${gal.length > 1 ? `<span class="galCount">${gal.length}</span>` : ''}
       ${pct ? `<span class="dealPct">${pct}%-</span>` : ''}
       ${d.badge ? `<span class="badge">${esc(d.badge)}</span>` : ''}</div>
     <div class="productBody">
@@ -999,7 +1164,7 @@ function itemCardHTML(d, page) {
         ${d.category ? `<span class="pill">${esc(d.category)}</span>` : ''}
         ${d.brand ? `<span class="pill">${esc(d.brand)}</span>` : ''}
         ${d.sku ? `<span class="pill">מק״ט ${esc(d.sku)}</span>` : ''}</div>` : ''}
-      <div class="pName"><h3>${esc(parts[0].trim())}</h3>${parts[1] ? `<span class="pModel">${esc(parts[1].trim())}</span>` : ''}</div>
+      <div class="pName cardOpen" role="link" tabindex="0" onclick="openProduct(${openArgs})" onkeydown="if(event.key==='Enter'){openProduct(${openArgs})}"><h3>${esc(parts[0].trim())}</h3>${parts[1] ? `<span class="pModel">${esc(parts[1].trim())}</span>` : ''}</div>
       ${d.desc ? `<p class="desc">${esc(d.desc)}</p>` : ''}
       ${flavorChips(d)}
       <div class="priceRow">
@@ -1061,11 +1226,11 @@ function renderAccessories() {
   g.innerHTML = arr.length ? arr.map(i => {
     const pct = discountPct(i);
     return `<article class="accCard">
-      <div class="accPic">${i.image ? `<img src="${esc(i.image)}" alt="${esc(i.name)}" loading="lazy">` : '<span class="accNoPic"></span>'}
+      <div class="accPic cardOpen" role="link" tabindex="0" onclick="openProduct('${i.id}','accessories')" onkeydown="if(event.key==='Enter'){openProduct('${i.id}','accessories')}">${i.image ? `<img src="${esc(i.image)}" alt="${esc(i.name)}" loading="lazy">` : '<span class="accNoPic"></span>'}
         ${pct ? `<span class="accPct">${pct}%-</span>` : ''}</div>
       <div class="accBody">
         ${i.brand ? `<span class="accBrand">${esc(i.brand)}</span>` : ''}
-        <h3>${esc(String(i.name).split('|')[0].trim())}</h3>
+        <h3 class="cardOpen" role="link" tabindex="0" onclick="openProduct('${i.id}','accessories')" onkeydown="if(event.key==='Enter'){openProduct('${i.id}','accessories')}">${esc(String(i.name).split('|')[0].trim())}</h3>
         ${i.desc ? `<p>${esc(i.desc)}</p>` : ''}
         <div class="accFoot">
           <div class="accPrice">${i.oldPrice ? `<s>${fmt(i.oldPrice)}</s>` : ''}<b>${fmt(i.price)}</b></div>
@@ -1157,13 +1322,61 @@ function allDealFlavorsOut() { dealFlavorDraft.forEach(f => f.out = true); rende
 function renderImgPreview(previewId, value) {
   const box = document.getElementById(previewId);
   if (!box) return;
-  box.innerHTML = value ? `<img src="${esc(value)}" alt="">` : '<span>אין תמונה</span>';
+  box.innerHTML = value ? `<img src="${esc(value)}" alt="תצוגה מקדימה">` : '<span>אין תמונה</span>';
 }
 function renderDealImgPreview() { renderImgPreview('dImgPreview', (document.getElementById('dImage') || {}).value); }
 function clearDealImage() {
   const el = document.getElementById('dImage'); if (el) el.value = '';
   const up = document.getElementById('dUpload'); if (up) up.value = '';
   renderDealImgPreview();
+}
+
+
+/* ===== גלריית תמונות בעורך =====
+   התמונה הראשונה היא זו שמוצגת בכרטיס. השאר נראות בעמוד המוצר. */
+let imageDraft = [];
+
+function itemImages(it) {
+  if (!it) return [];
+  const list = Array.isArray(it.images) ? it.images.filter(Boolean) : [];
+  if (it.image && !list.includes(it.image)) list.unshift(it.image);
+  return list;
+}
+function renderImageEditor() {
+  const box = document.getElementById('imgList');
+  if (!box) return;
+  box.innerHTML = imageDraft.length ? imageDraft.map((src, i) => `
+    <div class="imgItem${i === 0 ? ' main' : ''}">
+      <img src="${esc(src)}" alt="תמונה ${i + 1}">
+      ${i === 0 ? '<span class="imgMain">ראשית</span>' : ''}
+      <div class="imgOps">
+        ${i > 0 ? `<button class="iconBtn" onclick="makeMainImage(${i})" title="הפוך לראשית">★</button>` : ''}
+        <button class="iconBtn" onclick="removeImage(${i})" title="הסרה">🗑️</button>
+      </div>
+    </div>`).join('')
+    : '<div class="imgEmpty">לא הועלו תמונות</div>';
+  fset('dImage', imageDraft[0] || '');
+  renderImgPreview('dImgPreview', imageDraft[0] || '');
+}
+function makeMainImage(i) { const [x] = imageDraft.splice(i, 1); imageDraft.unshift(x); renderImageEditor(); }
+function removeImage(i) { imageDraft.splice(i, 1); renderImageEditor(); }
+function addImageUrl() {
+  const el = document.getElementById('newImgUrl');
+  const v = (el.value || '').trim();
+  if (!v) return;
+  imageDraft.push(v); el.value = ''; renderImageEditor();
+}
+/* העלאה מרובה. כל תמונה מוקטנת לפני השמירה, אחרת קובץ הנתונים מתנפח. */
+async function uploadImages(e) {
+  const files = [...(e.target.files || [])];
+  if (!files.length) return;
+  toast('מעלה ' + files.length + ' תמונות...');
+  for (const f of files) {
+    try { imageDraft.push(await resizeImage(f, 900, 900, .82)); } catch (err) {}
+  }
+  e.target.value = '';
+  renderImageEditor();
+  toast('נוספו ' + files.length + ' תמונות');
 }
 
 /* ניהול המבצעים */
@@ -1175,7 +1388,7 @@ function renderAdminDeals() {
   tb.innerHTML = itemsOf(adminCollection).map(d => {
     const pct = discountPct(d);
     return `<tr>
-      <td>${d.image ? `<img class="miniImg" src="${esc(d.image)}">` : `<div class="miniImg"></div>`}</td>
+      <td>${d.image ? `<img class="miniImg" src="${esc(d.image)}" alt="${esc(d.name)}">` : `<div class="miniImg"></div>`}</td>
       <td><b>${esc(d.name)}</b></td>
       <td>${d.oldPrice ? fmt(d.oldPrice) : '—'}</td>
       <td>${fmt(d.price)}</td>
@@ -1231,7 +1444,8 @@ function openDealModal() {
   });
   const cs = document.getElementById('dCollection'); if (cs) cs.value = adminCollection;
   const cm0 = document.getElementById('dCombo'); if (cm0) cm0.checked = false;
-  dealFlavorDraft = []; renderDealFlavorEditor(); renderDealImgPreview(); fillDealCatList();
+  dealFlavorDraft = []; imageDraft = []; renderImageEditor();
+  renderDealFlavorEditor(); renderDealImgPreview(); fillDealCatList();
   document.getElementById('dealModal').classList.add('open');
 }
 function closeDealModal() { document.getElementById('dealModal').classList.remove('open'); }
@@ -1247,6 +1461,8 @@ function editDeal(id) {
   set('dCollection', d.collection || 'deals');
   const cm = document.getElementById('dCombo'); if (cm) cm.checked = d.combo === true;
   dealFlavorDraft = JSON.parse(JSON.stringify(d.flavors || []));
+  imageDraft = itemImages(d).slice();
+  renderImageEditor();
   renderDealFlavorEditor(); renderDealImgPreview(); fillDealCatList();
   document.getElementById('dealModal').classList.add('open');
 }
@@ -1266,6 +1482,7 @@ async function saveDeal() {
     stock: Number(fval('dStock')) || 0,
     collection: (document.getElementById('dCollection') || {}).value || adminCollection,
     combo: !!(document.getElementById('dCombo') || {}).checked,
+    images: imageDraft.slice(),
     flavors: dealFlavorDraft.filter(f => f.n && f.n.trim()).map(f => ({ n: f.n.trim(), out: !!f.out })),
   };
   if (obj.oldPrice && obj.price && obj.price >= obj.oldPrice) {
@@ -1276,7 +1493,8 @@ async function saveDeal() {
     old_price: obj.oldPrice, price: obj.price,
     description: obj.desc, badge: obj.badge, image_url: obj.image,
     category: obj.category, brand: obj.brand, stock: obj.stock,
-    collection: obj.collection, combo: obj.combo, flavors: obj.flavors, sort_order: 0,
+    collection: obj.collection, combo: obj.combo, flavors: obj.flavors,
+    images: obj.images, sort_order: 0,
   };
   if (id) await supabase.from('deals').update(row).eq('id', id);
   else await supabase.from('deals').insert([row]);
@@ -1294,7 +1512,7 @@ function dealImageUpload(e) {
 
 /* ===== מעבר בין הקטלוג לעמוד התקנון =====
    האתר הוא קובץ אחד, ולכן "עמוד" נפרד מושג בהחלפת תצוגה.
-   הכתובת #takanon ניתנת לשליחה ולשמירה כמו כל עמוד רגיל. */
+   הכתובת #terms ניתנת לשליחה ולשמירה כמו כל עמוד רגיל. */
 function openAccessibility() {
   closeMenu(); closeA11yMenu();
   document.body.classList.remove('showDeals', 'showContact');
@@ -1310,7 +1528,7 @@ function openTerms() {
   closeMenu();
   document.body.classList.remove('showDeals', 'showContact', 'showAcc');
   document.body.classList.add('showTerms');
-  if (location.hash !== '#takanon') history.pushState(null, '', '#takanon');
+  if (location.hash !== '#terms') history.pushState(null, '', '#terms');
   window.scrollTo(0, 0);
 }
 function closeTerms() {
@@ -1324,13 +1542,16 @@ function routeFromHash() {
   document.body.classList.toggle('showContact', h === '#contact');
   document.body.classList.toggle('showA11y', h === '#accessibility');
   document.body.classList.toggle('showToys', h === '#toys');
+  const isProd = h.startsWith('#p/');
+  document.body.classList.toggle('showProduct', isProd);
+  if (isProd) { renderProduct(decodeURIComponent(h.slice(3))); window.scrollTo(0, 0); }
   if (h === '#accessories' || h === '#business') {
     document.body.classList.remove('showTerms', 'showContact', 'showDeals');
     setTimeout(() => scrollToEl(h.slice(1)), 60);
   }
   if (h === '#accessories') window.scrollTo(0, 0);
   if (h === '#contact') window.scrollTo(0, 0);
-  if (h === '#takanon') { document.body.classList.add('showTerms'); window.scrollTo(0, 0); }
+  if (h === '#terms') { document.body.classList.add('showTerms'); window.scrollTo(0, 0); }
   else if (!h.startsWith('#t')) { document.body.classList.remove('showTerms'); }
   if (h === '#deals') window.scrollTo(0, 0);
 }
@@ -1493,6 +1714,7 @@ async function addCategory() {
   toast('הקטגוריה נוספה');
 }
 
+function deleteCategoryAt(i) { return deleteCategory(data.categories[i]); }
 async function deleteCategory(c) {
   if (data.products.some(p => p.category === c)) {
     alert('יש מוצרים בקטגוריה הזאת. העבר אותם לקטגוריה אחרת לפני המחיקה.');
@@ -1773,13 +1995,15 @@ async function resetAll() {
 Object.assign(window, {
   publishData, loadDataFile, openTerms, closeTerms,
   openDeals, closeDeals, openAcc, closeAcc, openBiz, closeBiz, openCombo, goSection, toggleCombo,
-  openToys, closeToys, setToyCat, renderToys, scrollToEl, waDeal, saveDealsSettings, switchCollection, toggleCatalogVisible,
-  openContact, closeContact, sendContact, pickTopic,
+  openToys, closeToys, setToyCat, setToyCatAt, pickFlavorAt, renderToys, showMoreToys, resetToySearch, scrollToEl,
+  openProduct, closeProduct, shareProduct, pickFlavorOnPage, productUrl, waDeal, saveDealsSettings, switchCollection, toggleCatalogVisible,
+  openContact, closeContact, sendContact, pickTopic, pickTopicAt, filterCategoryAt, deleteCategoryAt,
   setA11y, toggleA11yMenu, closeA11yMenu, openAccessibility, closeAccessibility,
   comboItems, comboEligible, comboBreakdown, pageLabel, dealsList, itemsOf, cartSubtotal, cartTotal, collectionLabel, itemCollection, openMenu, closeMenu, toggleMenu, goHome, goCatalog, goCategories, goAbout,
   addToCart, setQty, removeLine, clearCart, openCart, closeCart, flashFlavorPrompt,
   pickWhen, pickPay, submitOrder,
   openDealModal, closeDealModal, saveDeal, editDeal, deleteDeal, dealImageUpload,
+  makeMainImage, removeImage, addImageUrl, uploadImages, setGalleryMain,
   setDealFlavorOut, setDealFlavorName, removeDealFlavor, addDealFlavor,
   allDealFlavorsIn, allDealFlavorsOut, clearDealImage, renderDealImgPreview, requestAdmin, adminLogout, changeAdminPass,
   pickFlavor, waProduct, filterCategory, scrollToCatalog,
@@ -1806,6 +2030,9 @@ async function init() {
   try {
     renderAll();
     applyA11y();
+    /* הניתוב הראשוני רץ עוד לפני שהנתונים הגיעו. אחרי הטעינה
+       מריצים אותו שוב, אחרת כניסה ישירה לקישור מוצר תציג עמוד ריק. */
+    routeFromHash();
   } catch (err) {
     console.error('Render failed:', err);
   }

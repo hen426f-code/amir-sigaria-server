@@ -41,9 +41,9 @@
   </div>
   <div class="catalogTools">
     <input id="search" class="field" placeholder="חיפוש לפי שם, מק״ט או מותג..." oninput="renderProducts()">
-    <select id="catFilter" class="field" onchange="renderProducts()"><option value="">כל הקטגוריות</option></select>
-    <select id="brandFilter" class="field" onchange="renderProducts()"><option value="">כל המותגים</option></select>
-    <select id="sort" class="field" onchange="renderProducts()">
+    <select id="catFilter" aria-label="סינון לפי קטגוריה" class="field" onchange="renderProducts()"><option value="">כל הקטגוריות</option></select>
+    <select id="brandFilter" aria-label="סינון לפי מותג" class="field" onchange="renderProducts()"><option value="">כל המותגים</option></select>
+    <select id="sort" aria-label="מיון התוצאות" class="field" onchange="renderProducts()">
       <option value="featured">מומלצים</option>
       <option value="priceAsc">מחיר: נמוך לגבוה</option>
       <option value="priceDesc">מחיר: גבוה לנמוך</option>
@@ -117,7 +117,7 @@
 </main>
 
 
-<!-- ===== עמוד התקנון. נפתח בכתובת #takanon ===== -->
+<!-- ===== עמוד התקנון. נפתח בכתובת #terms ===== -->
 <section id="terms" class="section legalPage"><div class="wrap">
   <div class="legalHead">
     <h1>תקנון ותנאי שימוש</h1>
@@ -305,15 +305,22 @@
     <div class="toysSectionHead">
       <h2 id="toysListTitle">כל המוצרים</h2>
       <div class="toysFilterRow">
-        <input id="toysSearch" class="tInput" placeholder="חיפוש מוצר" oninput="renderToys()" aria-label="חיפוש מוצר">
+        <input id="toysSearch" class="tInput" placeholder="חיפוש מוצר" oninput="resetToySearch()" aria-label="חיפוש מוצר">
         <button class="tChip" id="toysClear" onclick="setToyCat('')" hidden>ניקוי סינון</button>
       </div>
     </div>
+    <div class="toysCountRow"><span id="toysCount"></span></div>
     <div class="toysGrid" id="toysGrid"></div>
+    <div class="toysMoreRow"><button class="tBtn tBtnGhost hidden" id="toysMore" onclick="showMoreToys()">הצגת עוד מוצרים</button></div>
 
     <div class="toysBack"><button class="tBtn tBtnGhost" onclick="closeToys()">חזרה לאתר</button></div>
   </div>
 </section>
+
+<!-- ===== עמוד מוצר. נפתח בכתובת ‎#p/<מזהה>‎ וניתן לשיתוף ===== -->
+<section id="product" class="section productPage"><div class="wrap">
+  <div id="productView"></div>
+</div></section>
 
 <section id="contact" class="section contactPage"><div class="wrap">
   <div class="sectionHead">
@@ -329,18 +336,16 @@
       <div class="topicRow" id="topicRow"></div>
 
       <div class="grid2" style="margin-top:16px">
-        <div><label class="label">שם איש הקשר</label><input id="cName" class="input" placeholder="שם מלא"></div>
-        <div><label class="label">שם בית העסק</label><input id="cBiz" class="input" placeholder="לא חובה"></div>
+        <div><label class="label" for="cName">שם איש הקשר</label><input id="cName" class="input" placeholder="שם מלא"></div>
+        <div><label class="label" for="cBiz">שם בית העסק</label><input id="cBiz" class="input" placeholder="לא חובה"></div>
       </div>
 
       <div style="margin-top:14px">
-        <label class="label">טלפון לחזרה</label>
-        <input id="cPhone" class="input" type="tel" inputmode="tel" placeholder="לא חובה, אם תעדיף שנתקשר">
+        <label class="label" for="cPhone">טלפון לחזרה</label><input id="cPhone" class="input" type="tel" inputmode="tel" placeholder="לא חובה, אם תעדיף שנתקשר">
       </div>
 
       <div style="margin-top:14px">
-        <label class="label">פרטי הפנייה</label>
-        <textarea id="cMsg" class="input" rows="5" placeholder="ככל שתפרט יותר, כך נוכל לענות מהר יותר"></textarea>
+        <label class="label" for="cMsg">פרטי הפנייה</label><textarea id="cMsg" class="input" rows="5" placeholder="ככל שתפרט יותר, כך נוכל לענות מהר יותר"></textarea>
         <div class="fieldErr" id="cErr"></div>
       </div>
 
@@ -430,8 +435,8 @@
             <button type="button" class="whenBtn" data-when="later" onclick="pickWhen('later')">הזמנה עתידית</button>
           </div>
           <div class="grid2 hidden" id="whenFields" style="margin-top:10px">
-            <div><label class="label">תאריך</label><input id="orderDate" type="date" class="input"></div>
-            <div><label class="label">שעה</label><input id="orderTime" type="time" class="input"></div>
+            <div><label class="label" for="orderDate">תאריך</label><input id="orderDate" aria-label="תאריך אספקה" type="date" class="input"></div>
+            <div><label class="label" for="orderTime">שעה</label><input id="orderTime" aria-label="שעת אספקה" type="time" class="input"></div>
           </div>
         </div>
 
@@ -449,8 +454,7 @@
         </div>
 
         <div class="cartSection">
-          <label class="label">הערות להזמנה</label>
-          <textarea id="orderNote" class="input" rows="2" placeholder="לא חובה"></textarea>
+          <label class="label" for="orderNote">הערות להזמנה</label><textarea id="orderNote" class="input" rows="2" placeholder="לא חובה"></textarea>
         </div>
       </div>
     </div>
@@ -479,7 +483,7 @@
     <span id="footerPhone" style="margin-inline-start:10px"></span>
   </div>
   <div class="footLinks">
-    <a href="#takanon" onclick="openTerms();return false">תקנון ותנאי שימוש</a>
+    <a href="#terms" onclick="openTerms();return false">תקנון ותנאי שימוש</a>
     <a href="#accessibility" onclick="openAccessibility();return false" style="margin-inline-start:16px">הצהרת נגישות</a>
     <a href="#contact" onclick="openContact();return false" style="margin-inline-start:16px">צור קשר</a>
   </div>
@@ -570,20 +574,20 @@
             </div>
           </div>
           <div class="grid2" style="margin-top:12px">
-            <div><label class="label">שם עמוד המחירון</label><input id="setDealsTitle" class="input" placeholder="מבצעים"></div>
-            <div><label class="label">משפט הסבר</label><input id="setDealsSubtitle" class="input"></div>
+            <div><label class="label" for="setDealsTitle">שם עמוד המחירון</label><input id="setDealsTitle" class="input" placeholder="מבצעים"></div>
+            <div><label class="label" for="setDealsSubtitle">משפט הסבר</label><input id="setDealsSubtitle" class="input"></div>
           </div>
           <div class="grid2" style="margin-top:12px">
-            <div><label class="label">שם עמוד הצעצועים</label><input id="setToysTitle" class="input" placeholder="צעצועים"></div>
-            <div><label class="label">משפט הסבר</label><input id="setToysSubtitle" class="input"></div>
+            <div><label class="label" for="setToysTitle">שם עמוד הצעצועים</label><input id="setToysTitle" class="input" placeholder="צעצועים"></div>
+            <div><label class="label" for="setToysSubtitle">משפט הסבר</label><input id="setToysSubtitle" class="input"></div>
           </div>
           <div class="grid2" style="margin-top:12px">
-            <div><label class="label">שם הקטלוג לעסקים</label><input id="setBizTitle" class="input" placeholder="קטלוג לעסקים"></div>
-            <div><label class="label">משפט הסבר</label><input id="setBizSubtitle" class="input"></div>
+            <div><label class="label" for="setBizTitle">שם הקטלוג לעסקים</label><input id="setBizTitle" class="input" placeholder="קטלוג לעסקים"></div>
+            <div><label class="label" for="setBizSubtitle">משפט הסבר</label><input id="setBizSubtitle" class="input"></div>
           </div>
           <div class="grid2" style="margin-top:12px">
-            <div><label class="label">שם עמוד האביזרים</label><input id="setAccTitle" class="input" placeholder="אביזרי סלולר"></div>
-            <div><label class="label">משפט הסבר</label><input id="setAccSubtitle" class="input"></div>
+            <div><label class="label" for="setAccTitle">שם עמוד האביזרים</label><input id="setAccTitle" class="input" placeholder="אביזרי סלולר"></div>
+            <div><label class="label" for="setAccSubtitle">משפט הסבר</label><input id="setAccSubtitle" class="input"></div>
           </div>
           <div class="adminActions"><button class="btn primary" onclick="saveDealsSettings()">שמור</button></div>
         </div>
@@ -605,7 +609,7 @@
         <div class="adminCard">
           <h2>קטגוריות</h2>
           <div class="grid2" style="margin-top:16px">
-            <div><label class="label">שם קטגוריה חדשה</label><input id="newCat" class="input" placeholder="לדוגמה: אביזרים"></div>
+            <div><label class="label" for="newCat">שם קטגוריה חדשה</label><input id="newCat" class="input" placeholder="לדוגמה: אביזרים"></div>
             <div style="align-self:end"><button class="btn primary" onclick="addCategory()">הוסף קטגוריה</button></div>
           </div>
           <div id="adminCats" style="margin-top:18px"></div>
@@ -616,15 +620,15 @@
         <div class="adminCard">
           <h2>דף הבית</h2>
           <div class="grid2" style="margin-top:16px">
-            <div><label class="label">שורת כותרת קטנה</label><input id="setHeroEyebrow" class="input"></div>
-            <div><label class="label">כותרת ראשית</label><input id="setHeroTitle" class="input"></div>
-            <div><label class="label">כותרת עמוד הפנייה</label><input id="setContactTitle" class="input"></div>
-            <div><label class="label">טקסט בעמוד הפנייה</label><input id="setContactText" class="input"></div>
+            <div><label class="label" for="setHeroEyebrow">שורת כותרת קטנה</label><input id="setHeroEyebrow" class="input"></div>
+            <div><label class="label" for="setHeroTitle">כותרת ראשית</label><input id="setHeroTitle" class="input"></div>
+            <div><label class="label" for="setContactTitle">כותרת עמוד הפנייה</label><input id="setContactTitle" class="input"></div>
+            <div><label class="label" for="setContactText">טקסט בעמוד הפנייה</label><input id="setContactText" class="input"></div>
           </div>
-          <div style="margin-top:12px"><label class="label">טקסט ראשי</label><textarea id="setHeroText" class="textarea"></textarea></div>
+          <div style="margin-top:12px"><label class="label" for="setHeroText">טקסט ראשי</label><textarea id="setHeroText" class="textarea"></textarea></div>
           <div class="grid2" style="margin-top:12px">
-            <div><label class="label">כותרת אודות</label><input id="setAboutTitle" class="input"></div>
-            <div><label class="label">טקסט אודות</label><input id="setAboutText" class="input"></div>
+            <div><label class="label" for="setAboutTitle">כותרת אודות</label><input id="setAboutTitle" class="input"></div>
+            <div><label class="label" for="setAboutText">טקסט אודות</label><input id="setAboutText" class="input"></div>
           </div>
           <div class="adminActions"><button class="btn primary" onclick="saveHomepage()">שמור שינויים</button></div>
         </div>
@@ -634,15 +638,15 @@
         <div class="adminCard">
           <h2>פרטי העסק</h2>
           <div class="grid2" style="margin-top:16px">
-            <div><label class="label">שם העסק</label><input id="setBusinessName" class="input"></div>
-            <div><label class="label">שורת משנה</label><input id="setBusinessSub" class="input"></div>
-            <div><label class="label">טלפון</label><input id="setPhone" class="input"></div>
-            <div><label class="label">אימייל</label><input id="setEmail" class="input"></div>
-            <div><label class="label">מספר וואטסאפ בפורמט בינלאומי</label><input id="setWhatsapp" class="input" placeholder="972536364744"></div>
+            <div><label class="label" for="setBusinessName">שם העסק</label><input id="setBusinessName" class="input"></div>
+            <div><label class="label" for="setBusinessSub">שורת משנה</label><input id="setBusinessSub" class="input"></div>
+            <div><label class="label" for="setPhone">טלפון</label><input id="setPhone" class="input"></div>
+            <div><label class="label" for="setEmail">אימייל</label><input id="setEmail" class="input"></div>
+            <div><label class="label" for="setWhatsapp">מספר וואטסאפ בפורמט בינלאומי</label><input id="setWhatsapp" class="input" placeholder="972536364744"></div>
             
           </div>
-          <div style="margin-top:12px"><label class="label">טקסט בפוטר</label><input id="setFooterText" class="input"></div>
-          <div style="margin-top:12px"><label class="label">לוגו</label><input type="file" accept="image/*" class="input" onchange="uploadLogo(event)"><img id="logoPreview" class="previewLogo hidden"></div>
+          <div style="margin-top:12px"><label class="label" for="setFooterText">טקסט בפוטר</label><input id="setFooterText" class="input"></div>
+          <div style="margin-top:12px"><label class="label">לוגו</label><input type="file" accept="image/*" class="input" onchange="uploadLogo(event)"><img id="logoPreview" alt="תצוגה מקדימה של הלוגו" class="previewLogo hidden" alt=""></div>
           <div class="adminActions"><button class="btn primary" onclick="saveBusiness()">שמור פרטים</button></div>
         </div>
       </div>
@@ -651,9 +655,9 @@
         <div class="adminCard">
           <h2>עיצוב וצבעים</h2>
           <div class="grid3" style="margin-top:16px">
-            <div><label class="label">צבע ראשי</label><div class="colorRow"><input id="setPrimary" type="color"><input id="setPrimaryText" class="input"></div></div>
-            <div><label class="label">צבע משני</label><div class="colorRow"><input id="setSecondary" type="color"><input id="setSecondaryText" class="input"></div></div>
-            <div><label class="label">צבע הדגשה</label><div class="colorRow"><input id="setAccent" type="color"><input id="setAccentText" class="input"></div></div>
+            <div><label class="label" for="setPrimary">צבע ראשי</label><div class="colorRow"><input id="setPrimary" type="color" aria-label="בחירת צבע ראשי"><input id="setPrimaryText" class="input" aria-label="קוד צבע ראשי" placeholder="#000000"></div></div>
+            <div><label class="label" for="setSecondary">צבע משני</label><div class="colorRow"><input id="setSecondary" type="color" aria-label="בחירת צבע משני"><input id="setSecondaryText" class="input" aria-label="קוד צבע משני" placeholder="#000000"></div></div>
+            <div><label class="label" for="setAccent">צבע הדגשה</label><div class="colorRow"><input id="setAccent" type="color" aria-label="בחירת צבע הדגשה"><input id="setAccentText" class="input" aria-label="קוד צבע הדגשה" placeholder="#000000"></div></div>
           </div>
           <div class="adminActions"><button class="btn primary" onclick="saveDesign()">החל צבעים</button><button class="btn ghost" onclick="resetDesign()">חזור לברירת מחדל</button></div>
         </div>
@@ -679,16 +683,16 @@
 <div class="modal" id="productModal"><div class="modalBox">
   <div class="modalHead"><h3 id="productModalTitle">מוצר חדש</h3><button class="close" onclick="closeProductModal()">×</button></div>
   <div class="grid2" style="margin-top:16px">
-    <div><label class="label">שם מוצר</label><input id="pName" class="input"></div>
-    <div><label class="label">מק״ט</label><input id="pSku" class="input"></div>
-    <div><label class="label">מחיר</label><input id="pPrice" type="number" step="0.01" class="input"></div>
-    <div><label class="label">מחיר קודם / מחירון</label><input id="pOldPrice" type="number" step="0.01" class="input"></div>
-    <div><label class="label">קטגוריה</label><select id="pCategory" class="select"></select></div>
-    <div><label class="label">מותג</label><input id="pBrand" class="input"></div>
-    <div><label class="label">מלאי</label><input id="pStock" type="number" class="input"></div>
-    <div><label class="label">תגית</label><input id="pBadge" class="input" placeholder="חדש / מבצע"></div>
+    <div><label class="label" for="pName">שם מוצר</label><input id="pName" class="input"></div>
+    <div><label class="label" for="pSku">מק״ט</label><input id="pSku" class="input"></div>
+    <div><label class="label" for="pPrice">מחיר</label><input id="pPrice" type="number" step="0.01" class="input"></div>
+    <div><label class="label" for="pOldPrice">מחיר קודם / מחירון</label><input id="pOldPrice" type="number" step="0.01" class="input"></div>
+    <div><label class="label" for="pCategory">קטגוריה</label><select id="pCategory" class="select"></select></div>
+    <div><label class="label" for="pBrand">מותג</label><input id="pBrand" class="input"></div>
+    <div><label class="label" for="pStock">מלאי</label><input id="pStock" type="number" class="input"></div>
+    <div><label class="label" for="pBadge">תגית</label><input id="pBadge" class="input" placeholder="חדש / מבצע"></div>
   </div>
-  <div style="margin-top:12px"><label class="label">תיאור</label><textarea id="pDesc" class="textarea"></textarea></div>
+  <div style="margin-top:12px"><label class="label" for="pDesc">תיאור</label><textarea id="pDesc" class="textarea"></textarea></div>
   <div class="flavBlock">
     <div class="flavBlockHead"><label class="label" style="margin:0">טעמים — סמן "אזל" לכל טעם שנגמר</label>
       <div style="display:flex;gap:6px"><button class="iconBtn" onclick="allFlavorsIn()">הכל במלאי</button><button class="iconBtn" onclick="allFlavorsOut()">הכל אזל</button></div>
@@ -698,7 +702,7 @@
   </div>
   <div class="grid2" style="margin-top:12px">
     <div><label class="label">קישור לתמונה</label><div class="imgPreview" id="pImgPreview" style="margin-bottom:8px"></div><input id="pImage" class="input" placeholder="https://..."></div>
-    <div><label class="label">או העלאת תמונה מהמכשיר</label><input id="pUpload" type="file" accept="image/*" class="input" onchange="productImageUpload(event)"></div>
+    <div><label class="label" for="pUpload">או העלאת תמונה מהמכשיר</label><input id="pUpload" type="file" accept="image/*" class="input" onchange="productImageUpload(event)"></div>
   </div>
   <div class="adminActions"><button class="btn primary" onclick="saveProduct()">שמור מוצר</button><button class="btn ghost" onclick="closeProductModal()">ביטול</button></div>
 </div></div>
@@ -708,28 +712,28 @@
   <h3 id="dealModalTitle">פריט מבצע</h3>
   <input type="hidden" id="dId">
   <div class="grid2">
-    <div><label class="label">שם הפריט</label><input id="dName" class="input"></div>
-    <div><label class="label">מק״ט</label><input id="dSku" class="input"></div>
+    <div><label class="label" for="dName">שם הפריט</label><input id="dName" class="input"></div>
+    <div><label class="label" for="dSku">מק״ט</label><input id="dSku" class="input"></div>
   </div>
   <div class="grid2" style="margin-top:12px">
-    <div><label class="label">מחיר קודם</label><input id="dOldPrice" type="number" step="0.01" class="input" placeholder="יוצג עם קו חוצה"></div>
-    <div><label class="label">מחיר מבצע</label><input id="dPrice" type="number" step="0.01" class="input"></div>
+    <div><label class="label" for="dOldPrice">מחיר קודם</label><input id="dOldPrice" type="number" step="0.01" class="input" placeholder="יוצג עם קו חוצה"></div>
+    <div><label class="label" for="dPrice">מחיר מבצע</label><input id="dPrice" type="number" step="0.01" class="input"></div>
   </div>
-  <div style="margin-top:12px"><label class="label">תיאור</label><textarea id="dDesc" class="input" rows="3"></textarea></div>
+  <div style="margin-top:12px"><label class="label" for="dDesc">תיאור המוצר</label><textarea id="dDesc" class="input" rows="4" placeholder="מה הלקוח צריך לדעת על המוצר. מוצג בכרטיס ובעמוד המוצר."></textarea></div>
   <div class="grid2" style="margin-top:12px">
     <div class="comboCheck">
       <label class="switch"><input type="checkbox" id="dCombo"><span></span></label>
       <div><b>משתתף במבצע 2 ב־100</b><p>סימון מציג את הפריט בעמוד המבצע. כל שני פריטים מסומנים יחויבו 100 שקלים לזוג, אלא אם המחיר הרגיל זול יותר.</p></div>
     </div>
-    <div><label class="label">שייך לעמוד</label><select id="dCollection" class="input"><option value="deals">קטלוג דף הבית</option><option value="business">קטלוג לעסקים</option>
+    <div><label class="label" for="dCollection">שייך לעמוד</label><select id="dCollection" class="input"><option value="deals">קטלוג דף הבית</option><option value="business">קטלוג לעסקים</option>
 <option value="accessories">אביזרי סלולר</option>
 <option value="toys">צעצועים</option></select></div>
-    <div><label class="label">סוג</label><input id="dCategory" class="input" list="dCatList" placeholder="למשל: חד־פעמי"><datalist id="dCatList"></datalist></div>
-    <div><label class="label">מותג</label><input id="dBrand" class="input"></div>
+    <div><label class="label" for="dCategory">סוג</label><input id="dCategory" class="input" list="dCatList" placeholder="למשל: חד־פעמי"><datalist id="dCatList"></datalist></div>
+    <div><label class="label" for="dBrand">מותג</label><input id="dBrand" class="input"></div>
   </div>
   <div class="grid2" style="margin-top:12px">
-    <div><label class="label">מלאי</label><input id="dStock" type="number" class="input" placeholder="0 = לבירור מלאי"></div>
-    <div><label class="label">תווית</label><input id="dBadge" class="input" placeholder="למשל: מוגבל למלאי"></div>
+    <div><label class="label" for="dStock">מלאי</label><input id="dStock" type="number" class="input" placeholder="0 = לבירור מלאי"></div>
+    <div><label class="label" for="dBadge">תווית</label><input id="dBadge" class="input" placeholder="למשל: מוגבל למלאי"></div>
   </div>
 
   <div class="flavBlock">
@@ -743,8 +747,20 @@
     <div class="flavAdd"><input id="newDealFlavor" class="input" placeholder="שם טעם חדש, אפשר כמה מופרדים בפסיק"><button class="btn ghost" onclick="addDealFlavor()">הוסף</button></div>
   </div>
 
+  <div class="galBlock">
+    <div class="flavBlockHead">
+      <label class="label" style="margin:0">תמונות המוצר</label>
+      <div style="display:flex;gap:6px">
+        <label class="btn ghost">העלאת תמונות<input type="file" accept="image/*" multiple hidden onchange="uploadImages(event)"></label>
+      </div>
+    </div>
+    <p class="galNote">אפשר להעלות כמה תמונות. הראשונה היא זו שמוצגת בכרטיס, והשאר נראות בעמוד המוצר.</p>
+    <div class="imgList" id="imgList"></div>
+    <div class="flavAdd"><input id="newImgUrl" class="input" placeholder="או הדבקת קישור לתמונה"><button class="btn ghost" onclick="addImageUrl()">הוסף</button></div>
+  </div>
+
   <div style="margin-top:14px">
-    <label class="label">תמונה</label>
+    <label class="label">תמונה ראשית</label>
     <div class="imgField">
       <div class="imgPreview" id="dImgPreview"></div>
       <div class="imgBtns">

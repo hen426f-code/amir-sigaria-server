@@ -1460,3 +1460,128 @@ body.showToys .cartBtn { background: #fff1e6; border-color: #f0d5c0; color: #3a2
 }
 .dataWarn b { display: block; font-size: 15px; margin-bottom: 6px; color: #ffd9df; }
 .dataWarn p { margin: 0 0 12px; font-size: 13.5px; line-height: 1.7; color: var(--text-2); }
+
+/* ===== עמוד מוצר ===== */
+#product { display: none; padding-top: 128px; }
+body.showProduct #product { display: block; }
+body.showProduct main, body.showProduct .hero, body.showProduct .topWarn,
+body.showProduct #terms, body.showProduct #contact,
+body.showProduct #accessibility, body.showProduct #toys { display: none; }
+
+.cardOpen { cursor: pointer; }
+.cardOpen:focus-visible { outline: 3px solid #ffd54a; outline-offset: 3px; border-radius: 10px; }
+
+.pvGrid { display: grid; grid-template-columns: minmax(0,.9fr) minmax(0,1.1fr); gap: 32px; align-items: start; }
+.pvPic {
+  position: relative; aspect-ratio: 1; border-radius: 22px; overflow: hidden;
+  background: linear-gradient(165deg,#f7f8fb,#e9ecf4); display: grid; place-items: center;
+}
+.pvPic img { width: 100%; height: 100%; object-fit: contain; padding: 18px; }
+.pvNoPic { width: 70px; height: 70px; border-radius: 18px; background: #dfe5f2; }
+.pvPct, .pvBadge {
+  position: absolute; top: 14px; padding: 6px 14px; border-radius: 100px;
+  font-size: 13.5px; font-weight: 900; color: #fff;
+}
+.pvPct { inset-inline-start: 14px; background: linear-gradient(135deg,#ec4899,#db2777); }
+.pvBadge { inset-inline-end: 14px; background: var(--primary); }
+
+.pvInfo { display: flex; flex-direction: column; gap: 14px; }
+.pvMeta { display: flex; flex-wrap: wrap; gap: 7px; }
+.pvInfo h1 {
+  font-family: var(--font-display); font-weight: 900;
+  font-size: clamp(24px,3.4vw,38px); line-height: 1.25; margin: 0;
+}
+.pvModel { font-size: 13.5px; font-weight: 700; letter-spacing: .05em; color: var(--muted); direction: ltr; text-align: start; }
+.pvDesc {
+  font-size: 15.5px; line-height: 1.85; color: var(--text-2); margin: 0;
+  padding: 14px 16px; border-radius: 14px;
+  background: rgba(255,255,255,.04); border-inline-start: 2px solid rgba(124,92,255,.5);
+}
+.pvPrice { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; padding-top: 6px; }
+.pvPrice b { font-size: 34px; font-weight: 900; }
+.pvPrice s { font-size: 17px; color: var(--muted); }
+.pvFlav { padding-top: 4px; }
+.pvBtns { display: flex; gap: 10px; flex-wrap: wrap; padding-top: 6px; }
+.pvBtns .btn { flex: 1 1 auto; justify-content: center; min-width: 140px; }
+.shareBtn::before {
+  content: ''; width: 16px; height: 16px; flex: 0 0 16px; background: currentColor;
+  -webkit-mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path d='M18 16a3 3 0 00-2.2 1l-6-3.3a3 3 0 000-1.4l6-3.3a3 3 0 10-1-1.7l-6 3.3a3 3 0 100 4.8l6 3.3A3 3 0 1018 16z'/></svg>") center/contain no-repeat;
+  mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path d='M18 16a3 3 0 00-2.2 1l-6-3.3a3 3 0 000-1.4l6-3.3a3 3 0 10-1-1.7l-6 3.3a3 3 0 100 4.8l6 3.3A3 3 0 1018 16z'/></svg>") center/contain no-repeat;
+}
+.pvShareNote { min-height: 18px; font-size: 13px; color: #6ee7a0; }
+.pvBack { align-self: flex-start; margin-top: 8px; }
+
+/* בעמוד הצעצועים המוצר מקבל את השפה הבהירה */
+body.showProduct.toysCtx #product { background: #fff8f2; }
+
+@media (max-width: 860px) {
+  #product { padding-top: 104px; }
+  .pvGrid { grid-template-columns: 1fr; gap: 20px; }
+  .pvPrice b { font-size: 28px; }
+  .pvBtns .btn { flex: 1 1 100%; }
+}
+
+/* ===== גלריית תמונות בעורך ===== */
+.galBlock {
+  margin-top: 16px; padding: 15px; border-radius: 18px;
+  background: #0a0f1a; border: 1px solid var(--border);
+}
+.galNote { margin: 8px 0 12px; font-size: 12.5px; color: var(--muted); line-height: 1.6; }
+.imgList { display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 10px; }
+.imgItem {
+  position: relative; aspect-ratio: 1; border-radius: 12px; overflow: hidden;
+  background: var(--surface-2); border: 2px solid var(--border);
+}
+.imgItem.main { border-color: var(--primary); }
+.imgItem img { width: 100%; height: 100%; object-fit: cover; }
+.imgMain {
+  position: absolute; top: 5px; inset-inline-start: 5px; z-index: 2;
+  padding: 2px 8px; border-radius: 100px; font-size: 10.5px; font-weight: 800;
+  color: #fff; background: var(--primary);
+}
+.imgOps {
+  position: absolute; inset-inline: 0; bottom: 0; display: flex; justify-content: center; gap: 4px;
+  padding: 4px; background: rgba(6,8,14,.82);
+}
+.imgEmpty { grid-column: 1/-1; padding: 22px; text-align: center; font-size: 13px; color: var(--muted); }
+
+/* מונה תמונות על הכרטיס */
+.galCount {
+  position: absolute; bottom: 10px; inset-inline-start: 10px; z-index: 2;
+  padding: 3px 10px; border-radius: 100px; font-size: 11.5px; font-weight: 800;
+  color: #fff; background: rgba(6,8,14,.72); border: 1px solid rgba(255,255,255,.18);
+}
+
+/* גלריה בעמוד המוצר */
+.pvThumbs { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; grid-column: 1; }
+.pvThumb {
+  width: 64px; height: 64px; border-radius: 12px; overflow: hidden; cursor: pointer; padding: 0;
+  background: var(--surface-2); border: 2px solid var(--border); transition: border-color .18s;
+}
+.pvThumb.on { border-color: var(--primary); }
+.pvThumb img { width: 100%; height: 100%; object-fit: cover; }
+@media (max-width: 860px) { .pvThumbs { grid-column: auto; } }
+
+/* טעינה מדורגת בעמוד הצעצועים */
+.toysCountRow { margin-bottom: 12px; font-size: 13.5px; color: var(--tInk2); }
+.toysMoreRow { display: flex; justify-content: center; margin-top: 26px; }
+#toysMore { min-width: 240px; }
+
+/* מעבר רך בין מסכי האתר, כדי שהחלפה לא תיראה כקפיצה */
+main, .hero, #terms, #contact, #accessibility, #toys, #product {
+  animation: viewIn .22s cubic-bezier(.4,0,.2,1);
+}
+@keyframes viewIn { from { opacity: 0; transform: translateY(6px) } to { opacity: 1; transform: none } }
+body.a11yMotion main, body.a11yMotion .hero, body.a11yMotion #terms,
+body.a11yMotion #contact, body.a11yMotion #accessibility,
+body.a11yMotion #toys, body.a11yMotion #product { animation: none; }
+
+/* גלילה רכה בכל האתר, למעט למי שביקש לצמצם אנימציות */
+html { scroll-behavior: smooth; }
+body.a11yMotion, body.a11yMotion * { scroll-behavior: auto !important; }
+
+/* מחלקות עוטפות שנשארו ללא כללים אחרי מעבר המקטעים */
+.dealsPage, .productPage, .contactPage { position: relative; }
+.cartIcon { font-size: 18px; line-height: 1; }
+/* נקודת אחיזה לקוד בלבד, מקבלת עיצוב מהכפתור שעליו היא יושבת */
+.waLink { text-decoration: none; }

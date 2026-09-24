@@ -363,6 +363,107 @@ const chk=(name,cond,extra='')=>{ if(cond){pass++;console.log('  ✓ '+name);} e
  chk('עמוד המבצע מקבל תווית משלו', /2 ב/.test(w.eval("pageLabel('combo')")), w.eval("pageLabel('combo')"));
  w.clearCart(); await wait(150); w.closeCart(); await wait(100);
 
+
+ console.log('\n== עמוד מוצר וקישור לשיתוף ==');
+ const oc=d.querySelector('#productsGrid .deal .pic.cardOpen');
+ chk('הכרטיס ניתן ללחיצה', !!oc);
+ chk('נגיש גם במקלדת', !!oc && oc.getAttribute('tabindex')==='0');
+ oc.dispatchEvent(new w.MouseEvent('click',{bubbles:true})); await wait(300);
+ chk('עמוד המוצר נפתח', d.body.classList.contains('showProduct'));
+ chk('לכתובת יש מזהה מוצר', w.location.hash.startsWith('#p/'), w.location.hash);
+ chk('מוצגים שם ומחיר', !!(d.querySelector('.pvInfo h1')||{}).textContent && !!(d.querySelector('.pvPrice b')||{}).textContent);
+ chk('מצוין מאיזה עמוד המוצר', !!(d.querySelector('.pvMeta .pill')||{}).textContent);
+ chk('אפשר לבחור טעם בעמוד', d.querySelectorAll('.pvFlav .flav').length>0);
+ chk('יש כפתור הוספה לעגלה', !!d.querySelector('.pvBtns .btn.primary'));
+ chk('יש כפתור שיתוף', !!d.querySelector('.shareBtn'));
+ let copied=null;
+ Object.defineProperty(w.navigator,'clipboard',{value:{writeText:t=>{copied=t;return Promise.resolve()}},configurable:true});
+ await w.shareProduct(decodeURIComponent(w.location.hash.slice(3))); await wait(200);
+ chk('השיתוף מייצר קישור מלא', /^https?:\/\/.+#p\//.test(copied||''), String(copied));
+ w.closeProduct(); await wait(150);
+ chk('סגירה מחזירה לקטלוג', !d.body.classList.contains('showProduct'));
+ const toyOpen=d.querySelector('#toysGrid .toyPic.cardOpen') || d.querySelector('#bizGrid .deal .pic.cardOpen');
+ chk('גם בשאר העמודים הכרטיס נפתח', !!toyOpen);
+
+
+ console.log('\n== גלריית תמונות ותיאור ==');
+ w.openAdmin(); await wait(220);
+ w.switchCollection('deals'); await wait(150);
+ const gid=d.querySelector('#adminDeals .iconBtn').getAttribute('onclick').match(/'([^']+)'/)[1];
+ w.editDeal(gid); await wait(250);
+ chk('אזור הגלריה קיים בעורך', !!d.getElementById('imgList'));
+ chk('שדה התיאור קיים ומרווח', !!d.getElementById('dDesc') && Number(d.getElementById('dDesc').rows)>=4);
+ const n0=d.querySelectorAll('.imgItem').length;
+ d.getElementById('newImgUrl').value='https://example.com/a.jpg'; w.addImageUrl();
+ d.getElementById('newImgUrl').value='https://example.com/b.jpg'; w.addImageUrl();
+ await wait(150);
+ chk('אפשר להוסיף כמה תמונות', d.querySelectorAll('.imgItem').length===n0+2);
+ chk('התמונה הראשית מסומנת', !!d.querySelector('.imgItem.main .imgMain'));
+ w.makeMainImage(2); await wait(120);
+ chk('אפשר להחליף תמונה ראשית', d.querySelector('.imgItem img').src.includes('b.jpg'));
+ d.getElementById('dDesc').value='תיאור בדיקה';
+ await w.saveDeal(); await wait(420);
+ w.closeAdmin(); await wait(180);
+ const gcard=[...d.querySelectorAll('#productsGrid .deal')].find(c=>c.querySelector('.galCount'));
+ chk('הכרטיס מציג מונה תמונות', !!gcard, 'לא נמצא כרטיס עם מונה');
+ w.openProduct(gid,'deals'); await wait(280);
+ chk('עמוד המוצר מציג ממוזערות', d.querySelectorAll('.pvThumb').length>=2);
+ chk('התיאור מוצג בעמוד המוצר', (d.querySelector('.pvDesc')||{}).textContent==='תיאור בדיקה');
+ const b1=(d.getElementById('pvMainImg')||{}).src;
+ w.setGalleryMain(1,gid); await wait(120);
+ chk('מעבר בין תמונות עובד', b1!==(d.getElementById('pvMainImg')||{}).src);
+ w.closeProduct(); await wait(150);
+
+
+ console.log('\n== טעינה מדורגת ומעבר בין קטגוריות ==');
+ w.openToys(); await wait(350);
+ const shown=d.querySelectorAll('.toyCard').length;
+ const totalToys=w.eval('itemsOf("toys").length');
+ chk('לא נטענים כל המוצרים בבת אחת', totalToys<=24 || shown<totalToys, shown+' מתוך '+totalToys);
+ chk('מוצג מונה כמות', !!(d.getElementById('toysCount')||{}).textContent);
+ if (totalToys>24) {
+   chk('כפתור הצגת עוד מופיע', !d.getElementById('toysMore').classList.contains('hidden'));
+   w.showMoreToys(); await wait(200);
+   chk('הצגת עוד מוסיפה מוצרים', d.querySelectorAll('.toyCard').length>shown);
+ }
+ const cats=[...d.querySelectorAll('.toysCat')];
+ chk('יש קטגוריות ללחיצה', cats.length>0);
+ if (cats.length>1) {
+   const t0=(d.getElementById('toysListTitle')||{}).textContent;
+   cats[1].dispatchEvent(new w.MouseEvent('click',{bubbles:true})); await wait(280);
+   chk('מעבר לקטגוריה מחליף את הכותרת', (d.getElementById('toysListTitle')||{}).textContent!==t0);
+   chk('הקטגוריה מסומנת', d.querySelectorAll('.toysCat.on').length===1);
+   const t1=(d.getElementById('toysListTitle')||{}).textContent;
+   const cats2=[...d.querySelectorAll('.toysCat')];
+   cats2[2].dispatchEvent(new w.MouseEvent('click',{bubbles:true})); await wait(280);
+   chk('מעבר לקטגוריה נוספת עובד', (d.getElementById('toysListTitle')||{}).textContent!==t1);
+   w.setToyCat(''); await wait(250);
+   chk('ניקוי הסינון מחזיר את הכל', (d.getElementById('toysListTitle')||{}).textContent==='כל המוצרים');
+ }
+ w.closeToys(); await wait(150);
+
+
+ console.log('\n== שמות עם תווים מיוחדים ==');
+ // שם עם גרש הוטמע בעבר בתוך פקודת לחיצה ושבר אותה.
+ // כאן נבדק שכל קטגוריה מגיבה, ושאין יותר הטמעה של שמות בפקודות.
+ w.openToys(); await wait(350);
+ const allCats=[...d.querySelectorAll('.toysCat')];
+ let broken=[];
+ for (let i=0;i<allCats.length;i++){
+   const c=[...d.querySelectorAll('.toysCat')][i];
+   const nm=c.querySelector('.toysCatName').textContent;
+   c.dispatchEvent(new w.MouseEvent('click',{bubbles:true}));
+   await wait(55);
+   if ((d.getElementById('toysListTitle')||{}).textContent!==nm) broken.push(nm);
+ }
+ chk('כל קטגוריות הצעצועים מגיבות', broken.length===0, broken.join(' | '));
+ const withQuote=allCats.map(c=>c.querySelector('.toysCatName').textContent).filter(n=>/['"]/.test(n));
+ chk('קטגוריה עם גרש נבדקה', withQuote.length===0 || !broken.some(b=>/['"]/.test(b)), withQuote.join(' | '));
+ const jsSrc=[...d.querySelectorAll('script')].map(x=>x.textContent).join('');
+ chk('אין הטמעת שמות בפקודות לחיצה', !/setToyCat\('\$\{/.test(jsSrc) && !/pickFlavor\('\$\{p\.id\}','\$\{/.test(jsSrc));
+ w.setToyCat(''); await wait(200);
+ w.closeToys(); await wait(150);
+
  console.log('\n== מבנה דף הבית ==');
  const order=[...d.querySelectorAll('main > section')].map(x=>x.id).filter(Boolean);
  chk('סדר המקטעים נכון', JSON.stringify(order.slice(0,5))===JSON.stringify(['catalog','combo','business','accessories','categories']), order.join(' > '));
