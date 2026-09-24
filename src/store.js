@@ -16,6 +16,8 @@ let serverMode = false;
 let adminPass = '';
 
 export function isServerMode() { return serverMode; }
+let persistent = true;
+export function isPersistent() { return persistent; }
 export function setAdminPass(p) { adminPass = p || ''; }
 
 export async function initStore() {
@@ -23,7 +25,14 @@ export async function initStore() {
     const r = await fetch(API, { headers: { 'accept': 'application/json' } });
     if (r.ok) {
       const j = await r.json();
-      if (j && Array.isArray(j.products)) { db = j; serverMode = true; return true; }
+      if (j && Array.isArray(j.products)) {
+        db = j; serverMode = true;
+        try {
+          const st = await (await fetch('/api/status')).json();
+          persistent = st.persistent !== false;
+        } catch (e) { persistent = true; }
+        return true;
+      }
     }
   } catch (e) { /* אין שרת, ממשיכים מקומית */ }
   serverMode = false;

@@ -1452,3 +1452,11 @@ body.showToys .cartBtn { background: #fff1e6; border-color: #f0d5c0; color: #3a2
 /* אזור המידע בסרגל הפאנל */
 .adminTopInfo { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
 @media (max-width: 700px) { .adminTopInfo { width: 100%; } .serverState { font-size: 11px; } }
+
+/* אזהרת אחסון זמני בפאנל הניהול */
+.dataWarn {
+  margin: 14px 0 4px; padding: 16px 18px; border-radius: 16px;
+  background: rgba(179,24,47,.14); border: 2px solid rgba(220,60,90,.55);
+}
+.dataWarn b { display: block; font-size: 15px; margin-bottom: 6px; color: #ffd9df; }
+.dataWarn p { margin: 0 0 12px; font-size: 13.5px; line-height: 1.7; color: var(--text-2); }

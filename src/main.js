@@ -2,7 +2,7 @@ import './styles.css';
 import templateHtml from './template.html?raw';
 import { initSiteBackground } from './sitebg.js';
 import { supabase, exportDataFile, importDataFile, resetToSeed,
-         initStore, isServerMode, verifyAdmin, pushToServer, setAdminPass } from './store.js';
+         initStore, isServerMode, isPersistent, verifyAdmin, pushToServer, setAdminPass } from './store.js';
 import heroPhoto from './assets/images/image copy 3.webp';
 import heroBackdrop from './assets/images/hero-bg.webp';
 import brandLogo from './assets/images/logo.webp';
@@ -174,6 +174,18 @@ function applySettings() {
                                      : 'מצב מקומי · השינויים נשמרים בדפדפן הזה בלבד';
     st2.className = 'serverState ' + (isServerMode() ? 'on' : 'off');
   }
+  /* אזהרה בולטת כשהשרת אינו שומר את הנתונים בין פריסות.
+     בלעדיה קל לאבד שעות עבודה בפריסה אחת. */
+  const warn = document.getElementById('dataWarn');
+  if (warn) {
+    const risky = isServerMode() && !isPersistent();
+    warn.classList.toggle('hidden', !risky);
+    if (risky) warn.innerHTML = '<b>אזהרה: הנתונים אינם שורדים פריסה מחדש</b>' +
+      '<p>לשרת אין דיסק קבוע, ולכן כל העלאה של קוד חדש תמחק את המוצרים והמחירים ' +
+      'ותחזיר את קובץ הבסיס. עד לחיבור דיסק — הורד גיבוי אחרי כל שינוי, ' +
+      'והחלף בו את הקובץ שבתיקיית seed במאגר.</p>' +
+      '<button class="btn primary" onclick="publishData()">הורדת גיבוי עכשיו</button>';
+  }
   document.body.classList.toggle('hideCatalog', !catalogVisible());
   const s = data.settings;
   const heroDevice = document.getElementById('heroDevice');
@@ -262,7 +274,7 @@ function renderProducts() {
 
   const grid = document.getElementById('productsGrid');
   if (grid) {
-    grid.innerHTML = arr.length ? arr.map(itemCardHTML).join('')
+    grid.innerHTML = arr.length ? arr.map(p => itemCardHTML(p, 'deals')).join('')
       : `<div class="empty" style="grid-column:1/-1">לא נמצאו מוצרים</div>`;
   }
 
@@ -542,8 +554,8 @@ document.addEventListener('keydown', e => {
    נשמרת בדפדפן של הלקוח בלבד. בסיום ההזמנה מורכבת הודעת וואטסאפ
    מסודרת עם כל הפריטים, מועד האספקה ואמצעי התשלום המבוקש.
    התשלום עצמו אינו מתבצע באתר. ראו הערה בעמוד העגלה. */
-const BUILD_ID = 'B09241908';
-const BUILD_DATE = '24.09.2026 19:08';
+const BUILD_ID = 'B09242018';
+const BUILD_DATE = '24.09.2026 20:18';
 const CART_KEY = 'hameashenet_cart_v1';
 let cart = loadCart();
 
@@ -553,7 +565,7 @@ function loadCart() {
     if (!Array.isArray(x)) return [];
     /* המרה מהמבנה הישן, שבו שורה יכלה להחזיק כמה טעמים */
     return x.flatMap(l => {
-      if (!Array.isArray(l.flavors)) return [{ ...l, flavor: l.flavor || '' }];
+      if (!Array.isArray(l.flavors)) return [{ ...l, flavor: l.flavor || '', page: l.page || l.collection || 'deals' }];
       if (l.flavors.length <= 1) return [{ ...l, flavor: l.flavors[0] || '' }];
       return l.flavors.map(f => ({ ...l, flavor: f, key: l.kind + ':' + l.id + ':' + f }));
     });
@@ -564,12 +576,22 @@ function saveCart() {
   renderCart();
 }
 /* שם הקטלוג שממנו הגיע הפריט, לשמירה בשורת העגלה */
-function collectionLabel(col) {
+/* שם העמוד שממנו הפריט הוזמן בפועל, ולא רק האוסף שאליו הוא שייך.
+   פריט שנוסף מעמוד המבצע ייוחס למבצע, גם אם הוא שייך לקטלוג אחר. */
+function pageLabel(page) {
   const st = data.settings;
-  if (col === 'business') return st.business_title || 'קטלוג לעסקים';
-  if (col === 'accessories') return st.accessories_title || 'אביזרי סלולר';
-  if (col === 'legacy') return 'קטלוג ישן';
-  return st.deals_title || 'קטלוג מוצרים';
+  switch (page) {
+    case 'combo':       return 'מבצע 2 ב־' + COMBO_PRICE;
+    case 'business':    return st.business_title || 'קטלוג לעסקים';
+    case 'accessories': return st.accessories_title || 'אביזרי סלולר';
+    case 'toys':        return st.toys_title || 'צעצועים';
+    case 'legacy':      return 'קטלוג ישן';
+    default:            return st.deals_title || 'קטלוג מוצרים';
+  }
+}
+function collectionLabel(col) {
+  if (col === 'toys') return (data.settings.toys_title || 'צעצועים');
+  return pageLabel(col);
 }
 function itemCollection(id) {
   const it = dealsList().find(x => String(x.id) === String(id));
@@ -581,28 +603,29 @@ function findItem(kind, id) {
     ? dealsList().find(x => String(x.id) === String(id))
     : data.products.find(x => String(x.id) === String(id));
 }
-function addToCart(kind, id) {
-  const src = findItem(kind, id);
-  if (!src) return;
+function addToCart(kind, id, page) {
+  const item = findItem(kind, id);
+  if (!item) return;
 
   /* מוצר עם טעמים מחייב בחירת טעם אחד. בלי זה נוצרת בעגלה שורה
      שאי אפשר לספק. הבחירה היא של טעם יחיד, ולכן שורה בעגלה לעולם
      לא תכיל שני טעמים לאותו מוצר. */
-  const inStock = (src.flavors || []).filter(f => !f.out);
+  const inStock = (item.flavors || []).filter(f => !f.out);
   const sel = picked[id] || '';
   if (inStock.length && !sel) {
     flashFlavorPrompt(id);
     return;
   }
 
-  const key = kind + ':' + id + ':' + sel;
+  const src = page || itemCollection(id);
+  const key = kind + ':' + id + ':' + sel + ':' + src;
   const line = cart.find(l => l.key === key);
   if (line) line.qty += 1;
   else {
     const col = itemCollection(id);
-    cart.push({ key, kind, id, name: src.name, sku: src.sku || '',
-      price: Number(src.price) || 0, flavor: sel, qty: 1,
-      collection: col, source: collectionLabel(col) });
+    cart.push({ key, kind, id, name: item.name, sku: item.sku || '',
+      price: Number(item.price) || 0, flavor: sel, qty: 1,
+      collection: col, page: src, source: pageLabel(src) });
   }
   picked[id] = null;                 // איפוס, כדי שהבחירה הבאה תהיה מודעת
   renderProducts(); renderDeals();
@@ -755,21 +778,27 @@ function submitOrder() {
 
   /* הפריטים מקובצים לפי הקטלוג שממנו הוזמנו, עם כותרת לכל קבוצה,
      כדי שיהיה ברור מיד מאיפה כל פריט הגיע. */
+  /* קיבוץ לפי העמוד שממנו הוזמן הפריט, בסדר קבוע */
+  const ORDER = ['combo', 'deals', 'business', 'accessories', 'toys', 'legacy'];
   const groups = {};
   cart.forEach(l => {
-    const k = l.source || collectionLabel(l.collection);
+    const k = l.page || l.collection || 'deals';
     (groups[k] = groups[k] || []).push(l);
   });
-  const names = Object.keys(groups);
+  const keys = Object.keys(groups).sort((a, b) => {
+    const ia = ORDER.indexOf(a), ib = ORDER.indexOf(b);
+    return (ia < 0 ? 99 : ia) - (ib < 0 ? 99 : ib);
+  });
 
   let t = 'הזמנה חדשה מהאתר\n';
   t += '──────────────\n';
-  if (names.length > 1) t += 'ההזמנה כוללת פריטים מ־' + names.length + ' קטלוגים\n';
+  if (keys.length > 1) t += 'ההזמנה כוללת פריטים מ־' + keys.length + ' עמודים\n';
 
   let n = 0;
-  names.forEach(g => {
-    t += '\n◆ ' + g + '\n';
-    groups[g].forEach(l => {
+  keys.forEach(k => {
+    const label = groups[k][0].source || pageLabel(k);
+    t += '\n◆ ' + label + '\n';
+    groups[k].forEach(l => {
       n++;
       t += n + '. ' + l.name;
       if (l.sku) t += ' (' + l.sku + ')';
@@ -858,7 +887,7 @@ function renderToys() {
         ${i.desc ? `<p>${esc(i.desc)}</p>` : ''}
         <div class="toyFoot">
           <div class="toyPrice">${i.oldPrice ? `<s>${fmt(i.oldPrice)}</s>` : ''}<b>${fmt(i.price)}</b></div>
-          <button class="tBtn tBtnMain toyAdd" onclick="addToCart('deal','${i.id}')">הוספה</button>
+          <button class="tBtn tBtnMain toyAdd" onclick="addToCart('deal','${i.id}','toys')">הוספה</button>
         </div>
       </div>
     </article>`;
@@ -958,7 +987,7 @@ function discountPct(d) {
   return Math.round((1 - n / o) * 100);
 }
 
-function itemCardHTML(d) {
+function itemCardHTML(d, page) {
   const pct = discountPct(d);
   const parts = String(d.name).split('|');
   return `<article class="deal">
@@ -982,7 +1011,7 @@ function itemCardHTML(d) {
         ${d.stock > 0 ? `<span class="stock">במלאי: ${d.stock}</span>` : ''}
       </div>
       <div class="cardBtns">
-        <button class="btn primary full" onclick="addToCart('deal','${d.id}')">הוספה לעגלה${picked[d.id] ? ` · ${esc(picked[d.id])}` : ''}</button>
+        <button class="btn primary full" onclick="addToCart('deal','${d.id}','${page || (d.collection || 'deals')}')">הוספה לעגלה${picked[d.id] ? ` · ${esc(picked[d.id])}` : ''}</button>
         <button class="btn wa full" onclick="waDeal('${d.id}')">שאלה בוואטסאפ</button>
       </div>
     </div>
@@ -1001,7 +1030,7 @@ function renderCollection(col, gridId, titleId, subId, navId, titleKey, subKey) 
   }
   const grid = document.getElementById(gridId);
   if (grid) {
-    grid.innerHTML = arr.length ? arr.map(itemCardHTML).join('')
+    grid.innerHTML = arr.length ? arr.map(i => itemCardHTML(i, col)).join('')
       : `<div class="emptyPage" style="grid-column:1/-1">
            <b>העמוד עדיין ריק</b>
            <p>כדי להוסיף פריטים: פאנל ניהול, לשונית מבצעים, בחירת האוסף המתאים ואז פריט חדש.</p>
@@ -1016,7 +1045,7 @@ function renderCombo() {
   const nav = document.getElementById('navCombo');
   if (nav) nav.classList.toggle('hidden', arr.length === 0);
   setText('comboCount', arr.length + ' מוצרים משתתפים');
-  grid.innerHTML = arr.length ? arr.map(itemCardHTML).join('')
+  grid.innerHTML = arr.length ? arr.map(i => itemCardHTML(i, 'combo')).join('')
     : `<div class="emptyPage" style="grid-column:1/-1"><b>אין כרגע מוצרים במבצע</b><p>כדי לצרף מוצר: פאנל ניהול, קטלוג ומחירון, ואז לחיצה על העמודה "2 ב־100" בשורת המוצר.</p></div>`;
 }
 
@@ -1747,7 +1776,7 @@ Object.assign(window, {
   openToys, closeToys, setToyCat, renderToys, scrollToEl, waDeal, saveDealsSettings, switchCollection, toggleCatalogVisible,
   openContact, closeContact, sendContact, pickTopic,
   setA11y, toggleA11yMenu, closeA11yMenu, openAccessibility, closeAccessibility,
-  comboItems, comboEligible, comboBreakdown, dealsList, itemsOf, cartSubtotal, cartTotal, collectionLabel, itemCollection, openMenu, closeMenu, toggleMenu, goHome, goCatalog, goCategories, goAbout,
+  comboItems, comboEligible, comboBreakdown, pageLabel, dealsList, itemsOf, cartSubtotal, cartTotal, collectionLabel, itemCollection, openMenu, closeMenu, toggleMenu, goHome, goCatalog, goCategories, goAbout,
   addToCart, setQty, removeLine, clearCart, openCart, closeCart, flashFlavorPrompt,
   pickWhen, pickPay, submitOrder,
   openDealModal, closeDealModal, saveDeal, editDeal, deleteDeal, dealImageUpload,

@@ -63,6 +63,16 @@ app.post('/api/login', (req, res) => {
   res.json({ ok: req.get('x-admin-pass') === ADMIN_PASS });
 });
 
+/* האם הנתונים שורדים פריסה מחדש. בלי DATA_DIR מפורש הם אינם שורדים,
+   כי מערכת הקבצים של המכונה נמחקת בכל פריסה. */
+const PERSISTENT = !!process.env.DATA_DIR;
+
+app.get('/api/status', (req, res) => res.json({
+  ok: true,
+  persistent: PERSISTENT,
+  adminConfigured: !!ADMIN_PASS,
+}));
+
 app.get('/healthz', (req, res) => res.json({ ok: true }));
 
 app.use(express.static(path.join(__dirname, 'public'), {

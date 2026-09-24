@@ -303,6 +303,14 @@ const chk=(name,cond,extra='')=>{ if(cond){pass++;console.log('  ✓ '+name);} e
  w.clearCart(); await wait(150); w.closeCart(); await wait(100);
 
 
+
+ console.log('\n== הגנה על הנתונים ==');
+ chk('יש אזור אזהרה על אחסון זמני', !!d.getElementById('dataWarn'));
+ chk('האזהרה מוסתרת כשאין שרת', d.getElementById('dataWarn').classList.contains('hidden'));
+ const jsAll=[...d.querySelectorAll('script')].map(x=>x.textContent).join('');
+ chk('הקוד בודק אם האחסון קבוע', /persistent/.test(jsAll));
+ chk('יש כפתור הורדת גיבוי', /publishData/.test(jsAll));
+
  console.log('\n== עמוד הצעצועים ==');
  chk('העמוד קיים', !!d.getElementById('toys'));
  chk('אינו בזרימת דף הבית', !d.getElementById('toys').closest('main'));
@@ -321,6 +329,39 @@ const chk=(name,cond,extra='')=>{ if(cond){pass++;console.log('  ✓ '+name);} e
  chk('במסך צר הכפתור עובר לשורה נפרדת', /@media\(max-width:760px\)\{[^@]*flex-direction:column/.test(cssAll));
  chk('הכפתור ברוחב מלא ולא נחתך', /\.toyAdd,\.accAdd\{width:100%/.test(cssAll));
  chk('שטח המגע בכפתור תקין', /\.toyAdd\{[^}]*min-height:44px/.test(cssAll));
+
+
+ console.log('\n== מקור לפי עמוד ==');
+ w.clearCart(); await wait(150);
+ // פריט אחד מהקטלוג ואחד מעמוד המבצע — אותו מוצר, מקור שונה
+ async function pickAdd(sel,i){
+   const cs=[...d.querySelectorAll(sel)]; if(!cs[i]) return false;
+   const cp=cs[i].querySelector('.flav:not(.out)');
+   if(cp) cp.dispatchEvent(new w.MouseEvent('click',{bubbles:true}));
+   await wait(110);
+   const c2=[...d.querySelectorAll(sel)];
+   const b=c2[i].querySelector('.cardBtns .btn.primary, .toyAdd, .accAdd');
+   if(!b) return false;
+   b.dispatchEvent(new w.MouseEvent('click',{bubbles:true}));
+   await wait(260); w.closeCart(); await wait(90); return true;
+ }
+ await pickAdd('#productsGrid .deal',0);
+ const addedCombo = await pickAdd('#comboGrid .deal',0);
+ await pickAdd('#bizGrid .deal',0);
+ w.openCart(); await wait(200);
+ const srcs=[...d.querySelectorAll('.cartSrc')].map(x=>x.textContent);
+ chk('כל שורה נושאת תווית עמוד', srcs.length>0 && srcs.every(Boolean), srcs.join(' | '));
+ if (addedCombo) chk('פריט מעמוד המבצע מסומן כמבצע', srcs.some(x=>x.includes('2 ב')), srcs.join(' | '));
+ chk('אותו מוצר משני עמודים נשאר בשתי שורות', d.querySelectorAll('.cartLine').length>=2);
+ let om2=null; const oo2=w.open; w.open=u=>{om2=u};
+ w.submitOrder(); await wait(200); w.open=oo2;
+ const msg2=om2?decodeURIComponent(om2.split('text=')[1]):'';
+ chk('ההודעה מקובצת עם כותרת לכל עמוד', (msg2.match(/◆/g)||[]).length>=2, String((msg2.match(/◆/g)||[]).length));
+ chk('הכותרת מופיעה מעל המוצרים', /◆[^\n]*\n1\./.test(msg2) || /◆[^\n]*\n\d+\./.test(msg2));
+ chk('מצוין מספר העמודים בהזמנה', /פריטים מ־\d+ עמודים/.test(msg2));
+ chk('עמוד הצעצועים מקבל תווית משלו', w.eval("pageLabel('toys')")==='צעצועים', w.eval("pageLabel('toys')"));
+ chk('עמוד המבצע מקבל תווית משלו', /2 ב/.test(w.eval("pageLabel('combo')")), w.eval("pageLabel('combo')"));
+ w.clearCart(); await wait(150); w.closeCart(); await wait(100);
 
  console.log('\n== מבנה דף הבית ==');
  const order=[...d.querySelectorAll('main > section')].map(x=>x.id).filter(Boolean);
