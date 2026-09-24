@@ -499,7 +499,17 @@ function toggleMenu() {
   const m = document.getElementById('menuPanel');
   m.classList.contains('open') ? closeMenu() : openMenu();
 }
-function backToMain() { document.body.classList.remove('showTerms', 'showDeals', 'showContact', 'showAcc'); if (location.hash) history.pushState(null, '', location.pathname + location.search); }
+
+/* ===== ניהול מצבי תצוגה =====
+   כל עמוד שפורש מעל האתר מסומן במחלקה על גוף המסמך. בעבר כל
+   פונקציה ניקתה רשימה חלקית משלה, ולכן מעבר מעמוד אחד לאחר
+   השאיר לפעמים עמוד ישן פרוש מעל הכל וחסם את הניווט. */
+const VIEWS = ['showTerms', 'showContact', 'showA11y', 'showDeals', 'showToys', 'showProduct'];
+function showView(name) {
+  VIEWS.forEach(v => document.body.classList.toggle(v, v === name));
+}
+
+function backToMain() { showView(null); if (location.hash) history.pushState(null, '', location.pathname + location.search); }
 function goHome() { backToMain(); window.scrollTo({ top: 0, behavior: 'smooth' }); }
 function goCatalog() { backToMain(); setTimeout(() => scrollToEl('catalog'), 40); }
 function goCategories() { backToMain(); setTimeout(() => scrollToEl('categories'), 40); }
@@ -562,8 +572,8 @@ document.addEventListener('keydown', e => {
    נשמרת בדפדפן של הלקוח בלבד. בסיום ההזמנה מורכבת הודעת וואטסאפ
    מסודרת עם כל הפריטים, מועד האספקה ואמצעי התשלום המבוקש.
    התשלום עצמו אינו מתבצע באתר. ראו הערה בעמוד העגלה. */
-const BUILD_ID = 'B09242114';
-const BUILD_DATE = '24.09.2026 21:14';
+const BUILD_ID = 'B09242134';
+const BUILD_DATE = '24.09.2026 21:34';
 const CART_KEY = 'hameashenet_cart_v1';
 let cart = loadCart();
 
@@ -931,15 +941,14 @@ function resetToySearch() { toyShown = TOY_PAGE; renderToys(); }
 
 function openToys() {
   closeMenu(); closeA11yMenu();
-  document.body.classList.remove('showTerms', 'showContact', 'showA11y', 'showDeals');
-  document.body.classList.add('showToys');
+  showView('showToys');
   if (location.hash !== '#toys') history.pushState(null, '', '#toys');
   toyShown = TOY_PAGE;
   window.scrollTo(0, 0);
   renderToys();
 }
 function closeToys() {
-  document.body.classList.remove('showToys');
+  showView(null);
   if (location.hash === '#toys') history.pushState(null, '', location.pathname + location.search);
 }
 
@@ -962,15 +971,14 @@ function openProduct(id, page) {
   if (!it) return;
   productPageCtx = page || it.collection || 'deals';
   closeMenu(); closeA11yMenu(); closeCart();
-  document.body.classList.remove('showTerms', 'showContact', 'showA11y', 'showDeals', 'showToys');
-  document.body.classList.add('showProduct');
+  showView('showProduct');
   const want = '#p/' + encodeURIComponent(id);
   if (location.hash !== want) history.pushState(null, '', want);
   renderProduct(id);
   window.scrollTo(0, 0);
 }
 function closeProduct() {
-  document.body.classList.remove('showProduct');
+  showView(null);
   if (location.hash.startsWith('#p/')) history.pushState(null, '', location.pathname + location.search);
 }
 
@@ -1124,13 +1132,12 @@ function sendContact() {
 
 function openContact() {
   closeMenu();
-  document.body.classList.remove('showTerms', 'showDeals', 'showAcc');
-  document.body.classList.add('showContact');
+  showView('showContact');
   if (location.hash !== '#contact') history.pushState(null, '', '#contact');
   window.scrollTo(0, 0);
 }
 function closeContact() {
-  document.body.classList.remove('showContact');
+  showView(null);
   if (location.hash === '#contact') history.pushState(null, '', location.pathname + location.search);
 }
 
@@ -1281,13 +1288,12 @@ function closeAcc() { goHome(); }
 function openDeals() {
   closeMenu();
   if (catalogVisible()) { goCatalog(); return; }
-  document.body.classList.remove('showTerms', 'showContact', 'showAcc');
-  document.body.classList.add('showDeals');
+  showView('showDeals');
   if (location.hash !== '#deals') history.pushState(null, '', '#deals');
   window.scrollTo(0, 0);
 }
 function closeDeals() {
-  document.body.classList.remove('showDeals');
+  showView(null);
   history.pushState(null, '', location.pathname + location.search);
   window.scrollTo(0, 0);
 }
@@ -1515,45 +1521,51 @@ function dealImageUpload(e) {
    הכתובת #terms ניתנת לשליחה ולשמירה כמו כל עמוד רגיל. */
 function openAccessibility() {
   closeMenu(); closeA11yMenu();
-  document.body.classList.remove('showDeals', 'showContact');
-  document.body.classList.add('showA11y');
+  showView('showA11y');
   if (location.hash !== '#accessibility') history.pushState(null, '', '#accessibility');
   window.scrollTo(0, 0);
 }
 function closeAccessibility() {
-  document.body.classList.remove('showA11y');
+  showView(null);
   if (location.hash === '#accessibility') history.pushState(null, '', location.pathname + location.search);
 }
 function openTerms() {
   closeMenu();
-  document.body.classList.remove('showDeals', 'showContact', 'showAcc');
-  document.body.classList.add('showTerms');
+  showView('showTerms');
   if (location.hash !== '#terms') history.pushState(null, '', '#terms');
   window.scrollTo(0, 0);
 }
 function closeTerms() {
-  document.body.classList.remove('showTerms');
+  showView(null);
   history.pushState(null, '', location.pathname + location.search);
   window.scrollTo(0, 0);
 }
+/* הניתוב נגזר מהכתובת דרך אותו מנגנון יחיד, כך שלא ייתכן
+   מצב שבו שני עמודים פרושים בו־זמנית. */
 function routeFromHash() {
   const h = location.hash;
-  document.body.classList.toggle('showDeals', h === '#deals');
-  document.body.classList.toggle('showContact', h === '#contact');
-  document.body.classList.toggle('showA11y', h === '#accessibility');
-  document.body.classList.toggle('showToys', h === '#toys');
-  const isProd = h.startsWith('#p/');
-  document.body.classList.toggle('showProduct', isProd);
-  if (isProd) { renderProduct(decodeURIComponent(h.slice(3))); window.scrollTo(0, 0); }
-  if (h === '#accessories' || h === '#business') {
-    document.body.classList.remove('showTerms', 'showContact', 'showDeals');
+
+  if (h.startsWith('#p/')) {
+    showView('showProduct');
+    renderProduct(decodeURIComponent(h.slice(3)));
+    window.scrollTo(0, 0);
+    return;
+  }
+
+  const MAP = {
+    '#terms': 'showTerms',
+    '#contact': 'showContact',
+    '#accessibility': 'showA11y',
+    '#toys': 'showToys',
+    '#deals': 'showDeals',
+  };
+  if (MAP[h]) { showView(MAP[h]); window.scrollTo(0, 0); return; }
+
+  /* מקטעים בתוך דף הבית: מנקים כל עמוד פרוש ואז גוללים אליהם */
+  showView(null);
+  if (h === '#accessories' || h === '#business' || h === '#combo' || h === '#catalog' || h === '#categories' || h === '#about') {
     setTimeout(() => scrollToEl(h.slice(1)), 60);
   }
-  if (h === '#accessories') window.scrollTo(0, 0);
-  if (h === '#contact') window.scrollTo(0, 0);
-  if (h === '#terms') { document.body.classList.add('showTerms'); window.scrollTo(0, 0); }
-  else if (!h.startsWith('#t')) { document.body.classList.remove('showTerms'); }
-  if (h === '#deals') window.scrollTo(0, 0);
 }
 window.addEventListener('hashchange', routeFromHash);
 window.addEventListener('popstate', routeFromHash);

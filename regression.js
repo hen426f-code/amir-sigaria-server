@@ -464,6 +464,41 @@ const chk=(name,cond,extra='')=>{ if(cond){pass++;console.log('  ✓ '+name);} e
  w.setToyCat(''); await wait(200);
  w.closeToys(); await wait(150);
 
+
+ console.log('\n== מעבר בין עמודים ללא היתקעות ==');
+ const VIEWS=['showTerms','showContact','showA11y','showDeals','showToys','showProduct'];
+ const st=()=>VIEWS.filter(v=>d.body.classList.contains(v));
+ // מעמוד פרוש, כל בחירה בתפריט חייבת לנקות אותו
+ w.openToys(); await wait(200);
+ w.openMenu(); await wait(180);
+ const mb2=[...d.querySelectorAll('#menuLinks button')];
+ let stuck=[];
+ for (let i=0;i<mb2.length;i++){
+   w.openToys(); await wait(140);
+   w.openMenu(); await wait(120);
+   const bs=[...d.querySelectorAll('#menuLinks button')];
+   const lbl=bs[i].textContent.replace('ריק','').trim();
+   bs[i].dispatchEvent(new w.MouseEvent('click',{bubbles:true}));
+   await wait(220);
+   if (st().includes('showToys') && lbl!=='צעצועים') stuck.push(lbl);
+ }
+ chk('כל פריט בתפריט יוצא מעמוד הצעצועים', stuck.length===0, stuck.join(' | '));
+
+ w.openToys(); await wait(160);
+ const bar2=[...d.querySelectorAll('.mobileBar button')];
+ bar2[0].dispatchEvent(new w.MouseEvent('click',{bubbles:true})); await wait(220);
+ chk('הרצועה התחתונה יוצאת מעמוד הצעצועים', !st().includes('showToys'));
+
+ let multi=0;
+ for (const from of ['openToys','openTerms','openContact','openAccessibility'])
+   for (const to of ['openToys','openTerms','openContact','openAccessibility']) {
+     if (from===to) continue;
+     w[from](); await wait(110); w[to](); await wait(130);
+     if (st().length!==1) multi++;
+   }
+ chk('לעולם לא שני עמודים פרושים יחד', multi===0, String(multi)+' מעברים תקולים');
+ w.goHome(); await wait(180);
+
  console.log('\n== מבנה דף הבית ==');
  const order=[...d.querySelectorAll('main > section')].map(x=>x.id).filter(Boolean);
  chk('סדר המקטעים נכון', JSON.stringify(order.slice(0,5))===JSON.stringify(['catalog','combo','business','accessories','categories']), order.join(' > '));
